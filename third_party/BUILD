@@ -3,7 +3,7 @@
 
 package(default_visibility = ["//:__subpackages__"])
 
-load("//build_def:j2cl_import_open.bzl", "j2cl_import_open")
+load("//build_def:j2cl_import.bzl", "j2cl_import")
 
 # Apache2
 licenses(["notice"])
@@ -23,7 +23,7 @@ java_library(
     exports = ["@com_google_jsr305//jar"],
 )
 
-j2cl_import_open(
+j2cl_import(
     name = "jsr305_annotations-j2cl",
     jar = [
         ":jsr305_annotations",
@@ -45,7 +45,7 @@ java_library(
     exports = ["@com_google_jsinterop_annotations//jar"],
 )
 
-j2cl_import_open(
+j2cl_import(
     name = "gwt-jsinterop-annotations-j2cl",
     jar = [
         ":gwt-jsinterop-annotations",
@@ -126,10 +126,11 @@ alias(
 
 alias(
     name = "gwt_java_emul",
-    actual = "@org_gwtproject_gwt//:java_emul",
+    actual = "@org_gwtproject_gwt//user:java_emul",
 )
 
 alias(
     name = "gwt_java_emul_internal",
-    actual = "@org_gwtproject_gwt//:java_emul_internal",
+    actual = "@org_gwtproject_gwt//user:java_emul_internal",
 )
+
