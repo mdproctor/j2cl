@@ -15,5 +15,4 @@ filegroup(
 java_library(
     name = "gwt-javaemul-internal-annotations",
     srcs = glob(["user/super/com/google/gwt/emul/javaemul/internal/annotations/*.java"]),
-
 )

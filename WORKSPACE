@@ -142,4 +142,3 @@ closure_repositories(
     omit_args4j=True,
     omit_closure_library=True,
 )
-

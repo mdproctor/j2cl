@@ -18,17 +18,17 @@ j2cl_mirror_from_gwt(
     extra_js_srcs = [
         "//jre/java/javaemul/internal/vmbootstrap/primitives",
     ],
-    js_deps = [
-        "//third_party:closure_reflect",
-        "//third_party:closure_math_long",
-        "//third_party:closure_base",
-    ],
+#    js_deps = [
+#        "//third_party:closure_reflect",
+#        "//third_party:closure_math_long",
+#        "//third_party:closure_base",
+#    ],
     mirrored_files = [
         "//third_party:gwt_java_emul",
         "//third_party:gwt_java_emul_internal",
     ],
     deps = [
-        "//third_party/java/jsr305_annotations:jsr305_annotations-j2cl",
+        "//third_party:jsr305_annotations-j2cl",
         "//third_party:gwt-javaemul-internal-annotations-j2cl",
         "//third_party:gwt-jsinterop-annotations-j2cl",
     ],
