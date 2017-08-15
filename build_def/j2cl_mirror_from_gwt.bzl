@@ -7,7 +7,7 @@ overlaying files from current directory.
 
 load(":j2cl_source_copy.bzl", "j2cl_source_copy")
 load(":jsni_to_native_js_bundle.bzl", "jsni_to_native_js_bundle")
-load("//build_def:j2cl_library_open.bzl", "j2cl_library_open")
+load("//build_def:j2cl_library.bzl", "j2cl_library")
 
 def j2cl_mirror_from_gwt(name,
                          mirrored_files,
@@ -21,9 +21,6 @@ def j2cl_mirror_from_gwt(name,
   native_srcs = native.glob(["**/*.native.js"])
   js_srcs = native.glob(["**/*.js"], exclude = native_srcs) + extra_js_srcs
 
-  print("mirrored_files: ")
-  print(mirrored_files)
-
   j2cl_source_copy(
       name = name + "_copy",
       srcs = mirrored_files,
@@ -35,12 +32,20 @@ def j2cl_mirror_from_gwt(name,
       srcs = [":" + name + "_copy"] + super_srcs,
   )
 
+  native.java_library(
+      name = "foo",
+      srcs = [":" + name + "_java_files"],
+      deps = deps,
+  )
+
+  print(native_srcs)
+
   jsni_to_native_js_bundle(
       name = name +"_native_zips",
       srcs = [":" + name + "_java_files"],
       native_srcs = native_srcs,
       testonly = kwargs.get("testonly", 0),
-      deps = [":" + name + "_java_library"],
+      deps = [":foo"],
   )
 
   packaged_js_srcs = None
@@ -51,7 +56,7 @@ def j2cl_mirror_from_gwt(name,
     )
     packaged_js_srcs = [":" + name + "_js_files"]
 
-  j2cl_library_open(
+  j2cl_library(
       name = name,
       srcs = [":" + name + "_java_files"],
       js_srcs = packaged_js_srcs,

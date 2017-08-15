@@ -18,10 +18,7 @@ def _impl(ctx):
   excludes = ctx.attr.excludes
 
   java_out_files = []
-  print("hello")
-  print(java_out_files)
   for java_file in java_files:
-    print(java_file)
     out_file_name = java_file.path;
     if any([out_file_name.endswith(x) for x in excludes]):
       continue;

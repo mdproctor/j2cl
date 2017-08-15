@@ -122,11 +122,9 @@ new_http_archive(
   strip_prefix="closure-library-20170409"
 )
 
-new_http_archive(
+http_archive(
   name="org_gwtproject_gwt",
-  url="https://github.com/gwtproject/gwt/archive/2.8.1.tar.gz",
-  build_file="gwt.BUILD",
-  strip_prefix="gwt-2.8.1"
+  url="https://gwt.googlesource.com/gwt/+archive/master.tar.gz",
 )
 
 http_archive(

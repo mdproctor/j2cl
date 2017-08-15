@@ -91,7 +91,7 @@ def jsni_to_native_js_bundle(name, srcs, native_srcs=[], testonly = 0, **kwargs)
      testonly = testonly,
       **kwargs
   )
-
+  print(native_srcs)
   generate_zip(
       name = name + "_handrolled.js.zip",
       srcs = native_srcs,

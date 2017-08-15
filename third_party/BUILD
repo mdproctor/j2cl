@@ -134,3 +134,7 @@ alias(
     actual = "@org_gwtproject_gwt//user:java_emul_internal",
 )
 
+alias(
+    name = "gwt-javaemul-internal-annotations",
+    actual = "@org_gwtproject_gwt//user:gwt-javaemul-internal-annotations",
+)
