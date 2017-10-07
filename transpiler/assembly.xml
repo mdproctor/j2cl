@@ -1,0 +1,24 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+  <id>transpiler-jar</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+
+      <!-- Enable access to all projects in the current multimodule build! -->
+      <!--<useAllReactorProjects>true</useAllReactorProjects>-->
+
+      <!-- Now, select which projects to include in this module-set. -->
+      <includes>
+        <include>com.google.j2cl:*</include>
+      </includes>
+      <scope>compile</scope>
+      <unpack>true</unpack>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+  </dependencySets>
+</assembly>

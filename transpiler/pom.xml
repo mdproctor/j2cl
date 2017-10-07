@@ -4,11 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 <!--
+Taken from the J2clTranspiler sh script:
 "${RUNPATH}transpiler/java/com/google/j2cl/transpiler/libtranspiler_lib.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/ast/libast.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/ast/annotations/libannotations-internal.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/ast/common/libcommon.jar
-  ${RUNPATH}transpiler/java/com/google/j2cl/ast/sourcemap/libsourcemap.jar
+${RUNPATH}transpiler/java/com/google/j2cl/ast/sourcemap/libsourcemap.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/common/libcommon.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/problems/libproblems.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/ast/visitors/libvisitors.jar
@@ -16,14 +17,15 @@ ${RUNPATH}transpiler/java/com/google/j2cl/frontend/libfrontend.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/frontend/common/libcommon.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/generator/libgenerator.jar
 ${RUNPATH}transpiler/java/com/google/j2cl/generator/visitors/libvisitors.jar"
-     ${RUNPATH}../com_google_guava/jar/guava-21.0.jar
-     ${RUNPATH}../com_google_auto_value/jar/auto-value-1.4.jar
-     ${RUNPATH}../com_google_jsr305/jar/jsr305-3.0.1.jar
-     ${RUNPATH}../org_apache_commons_lang3/jar/commons-lang3-3.5.jar
-     ${RUNPATH}../args4j/jar/args4j-2.33.jar
-     ${RUNPATH}../com_google_jsinterop_annotations/jar/jsinterop-annotations-1.0.1.jar
-     ${RUNPATH}../org_eclipse_jdt_compiler_apt/jar/org.eclipse.jdt.compiler.apt_1.2.0.v20150514-0146.jar
-    ${RUNPATH}../org_eclipse_jdt_content_type/jar/org.eclipse.core.contenttype_3.5.0.v20150421-2214.jar
+${RUNPATH}../com_google_guava/jar/guava-21.0.jar
+${RUNPATH}../com_google_auto_value/jar/auto-value-1.4.jar
+${RUNPATH}../com_google_jsr305/jar/jsr305-3.0.1.jar
+${RUNPATH}../org_apache_commons_lang3/jar/commons-lang3-3.5.jar
+${RUNPATH}../args4j/jar/args4j-2.33.jar
+${RUNPATH}../com_google_jsinterop_annotations/jar/jsinterop-annotations-1.0.1.jar
+
+${RUNPATH}../org_eclipse_jdt_compiler_apt/jar/org.eclipse.jdt.compiler.apt_1.2.0.v20150514-0146.jar
+${RUNPATH}../org_eclipse_jdt_content_type/jar/org.eclipse.core.contenttype_3.5.0.v20150421-2214.jar
 ${RUNPATH}../org_eclipse_jdt_core/jar/org.eclipse.jdt.core_3.11.2.v20160128-0629.jar
 ${RUNPATH}../org_eclipse_jdt_equinox_common/jar/org.eclipse.equinox.common_3.7.0.v20150402-1709.jar
 ${RUNPATH}../org_eclipse_jdt_equinox_preferences/jar/org.eclipse.equinox.preferences_3.5.300.v20150408-1437.jar
@@ -33,7 +35,8 @@ ${RUNPATH}../org_eclipse_jdt_resources/jar/org.eclipse.core.resources_3.10.1.v20
 ${RUNPATH}../org_eclipse_jdt_runtime/jar/org.eclipse.core.runtime_3.11.1.v20150903-1804.jar
 ${RUNPATH}../org_eclipse_jdt_runtime_compatibility/jar/org.eclipse.core.runtime.compatibility_3.2.300.v20150423-0821.jar
 ${RUNPATH}../org_eclipse_jdt_text/jar/org.eclipse.text_3.5.400.v20150505-1044.jar
-     ${RUNPATH}../com_google_jscomp/jar/closure-compiler-v20170409.jar
+
+${RUNPATH}../com_google_jscomp/jar/closure-compiler-v20170409.jar
 -->
   <groupId>com.vertispan.j2cl</groupId>
   <artifactId>transpiler</artifactId>
@@ -41,7 +44,11 @@ ${RUNPATH}../org_eclipse_jdt_text/jar/org.eclipse.text_3.5.400.v20150505-1044.ja
 
   <modelVersion>4.0.0</modelVersion>
 
+  <packaging>pom</packaging>
+
   <dependencies>
+
+    <!-- External dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -73,35 +80,170 @@ ${RUNPATH}../org_eclipse_jdt_text/jar/org.eclipse.text_3.5.400.v20150505-1044.ja
       <artifactId>jsinterop-annotations</artifactId>
       <version>1.0.1</version>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.eclipse.tycho</groupId>-->
-      <!--<artifactId>org.eclipse.jdt.compiler.apt</artifactId>-->
-      <!--<version>1.2.0.v20150514-0146</version>-->
-      <!--&lt;!&ndash; latest is 1.3.0.v20170502-0408 &ndash;&gt;-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>org.eclipse.birt.runtime</groupId>-->
-      <!--<artifactId>org.eclipse.core.contenttype</artifactId>-->
-      <!--<version>3.5.0.v20150421-2214</version>-->
-    <!--</dependency>-->
-    
-    <!--<dependency>-->
-      <!--<groupId>com.reubenpeeris</groupId>-->
-      <!--<artifactId>org.eclipse.jdt.core.compiler.ecj</artifactId>-->
-      <!--<version>4.5.2-201602121500</version>-->
-    <!--</dependency>-->
+
     <dependency>
       <groupId>org.eclipse.jdt</groupId>
       <artifactId>org.eclipse.jdt.core</artifactId>
       <version>3.12.3</version>
+      <!-- newer than requested, seems to work -->
     </dependency>
-    
-
 
     <dependency>
       <groupId>com.google.javascript</groupId>
       <artifactId>closure-compiler</artifactId>
       <version>v20170409</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.jsinterop</groupId>
+          <artifactId>jsinterop-annotations</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- https://maven.apache.org/enforcer/enforcer-rules/dependencyConvergence.html -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4.1</version>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <configuration>
+              <rules>
+                <dependencyConvergence/>
+              </rules>
+            </configuration>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- Yes, systemPath and assembly is about the worst way possible to do this that is actually supported by maven, but otoh it is very easy to wire up -->
+  <profiles>
+    <profile>
+      <id>package</id>
+      <dependencies>
+        <!-- Bazel generated jars that make up the classpath of the J2CL transpiler -->
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>transpiler-lib</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/transpiler/libtranspiler_lib.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>ast</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/ast/libast.jar</systemPath>
+        </dependency>
+        <!-- Not actually used at runtime, bug in bazel build? -->
+        <!--<dependency>-->
+        <!--<groupId>com.google.j2cl</groupId>-->
+        <!--<artifactId>ast-annotations</artifactId>-->
+        <!--<version>${project.version}</version>-->
+        <!--<scope>system</scope>-->
+        <!--<systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/ast/annotations/libannotations-internal.jar</systemPath>-->
+        <!--</dependency>-->
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>ast-common</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/ast/common/libcommon.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>ast-sourcemap</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/ast/sourcemap/libsourcemap.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>common</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/common/libcommon.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>problems</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/problems/libproblems.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>ast-visitors</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/ast/visitors/libvisitors.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>frontend</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/frontend/libfrontend.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>frontend-common</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/frontend/common/libcommon.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>generator</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/generator/libgenerator.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>com.google.j2cl</groupId>
+          <artifactId>generator-visitors</artifactId>
+          <version>${project.version}</version>
+          <scope>system</scope>
+          <systemPath>${basedir}/../bazel-bin/transpiler/java/com/google/j2cl/generator/visitors/libvisitors.jar</systemPath>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <descriptors>
+                    <descriptor>assembly.xml</descriptor>
+                  </descriptors>
+                  <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
