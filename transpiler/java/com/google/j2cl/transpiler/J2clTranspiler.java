@@ -129,7 +129,7 @@ public class J2clTranspiler {
   }
 
   /** Runs the entire J2CL pipeline. */
-  Result transpile(String... args) {
+  public Result transpile(String... args) {
     try {
       loadOptions(args);
       CompilationUnitsAndTypeBindings jdtUnitsAndResolvedBindings =

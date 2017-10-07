@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+<!--
+"${RUNPATH}transpiler/java/com/google/j2cl/transpiler/libtranspiler_lib.jar
+${RUNPATH}transpiler/java/com/google/j2cl/ast/libast.jar
+${RUNPATH}transpiler/java/com/google/j2cl/ast/annotations/libannotations-internal.jar
+${RUNPATH}transpiler/java/com/google/j2cl/ast/common/libcommon.jar
+  ${RUNPATH}transpiler/java/com/google/j2cl/ast/sourcemap/libsourcemap.jar
+${RUNPATH}transpiler/java/com/google/j2cl/common/libcommon.jar
+${RUNPATH}transpiler/java/com/google/j2cl/problems/libproblems.jar
+${RUNPATH}transpiler/java/com/google/j2cl/ast/visitors/libvisitors.jar
+${RUNPATH}transpiler/java/com/google/j2cl/frontend/libfrontend.jar
+${RUNPATH}transpiler/java/com/google/j2cl/frontend/common/libcommon.jar
+${RUNPATH}transpiler/java/com/google/j2cl/generator/libgenerator.jar
+${RUNPATH}transpiler/java/com/google/j2cl/generator/visitors/libvisitors.jar"
+     ${RUNPATH}../com_google_guava/jar/guava-21.0.jar
+     ${RUNPATH}../com_google_auto_value/jar/auto-value-1.4.jar
+     ${RUNPATH}../com_google_jsr305/jar/jsr305-3.0.1.jar
+     ${RUNPATH}../org_apache_commons_lang3/jar/commons-lang3-3.5.jar
+     ${RUNPATH}../args4j/jar/args4j-2.33.jar
+     ${RUNPATH}../com_google_jsinterop_annotations/jar/jsinterop-annotations-1.0.1.jar
+     ${RUNPATH}../org_eclipse_jdt_compiler_apt/jar/org.eclipse.jdt.compiler.apt_1.2.0.v20150514-0146.jar
+    ${RUNPATH}../org_eclipse_jdt_content_type/jar/org.eclipse.core.contenttype_3.5.0.v20150421-2214.jar
+${RUNPATH}../org_eclipse_jdt_core/jar/org.eclipse.jdt.core_3.11.2.v20160128-0629.jar
+${RUNPATH}../org_eclipse_jdt_equinox_common/jar/org.eclipse.equinox.common_3.7.0.v20150402-1709.jar
+${RUNPATH}../org_eclipse_jdt_equinox_preferences/jar/org.eclipse.equinox.preferences_3.5.300.v20150408-1437.jar
+${RUNPATH}../org_eclipse_jdt_jobs/jar/org.eclipse.core.jobs_3.7.0.v20150330-2103.jar
+${RUNPATH}../org_eclipse_jdt_osgi/jar/org.eclipse.osgi_3.10.102.v20160118-1700.jar
+${RUNPATH}../org_eclipse_jdt_resources/jar/org.eclipse.core.resources_3.10.1.v20150725-1910.jar
+${RUNPATH}../org_eclipse_jdt_runtime/jar/org.eclipse.core.runtime_3.11.1.v20150903-1804.jar
+${RUNPATH}../org_eclipse_jdt_runtime_compatibility/jar/org.eclipse.core.runtime.compatibility_3.2.300.v20150423-0821.jar
+${RUNPATH}../org_eclipse_jdt_text/jar/org.eclipse.text_3.5.400.v20150505-1044.jar
+     ${RUNPATH}../com_google_jscomp/jar/closure-compiler-v20170409.jar
+-->
+  <groupId>com.vertispan.j2cl</groupId>
+  <artifactId>transpiler</artifactId>
+  <version>0.1-SNAPSHOT</version>
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>21.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>3.0.1</version>
+      <!-- 3.0.2 is available -->
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.5</version>
+    </dependency>
+    <dependency>
+      <groupId>args4j</groupId>
+      <artifactId>args4j</artifactId>
+      <version>2.33</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.jsinterop</groupId>
+      <artifactId>jsinterop-annotations</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.eclipse.tycho</groupId>-->
+      <!--<artifactId>org.eclipse.jdt.compiler.apt</artifactId>-->
+      <!--<version>1.2.0.v20150514-0146</version>-->
+      <!--&lt;!&ndash; latest is 1.3.0.v20170502-0408 &ndash;&gt;-->
+    <!--</dependency>-->
+    <!--<dependency>-->
+      <!--<groupId>org.eclipse.birt.runtime</groupId>-->
+      <!--<artifactId>org.eclipse.core.contenttype</artifactId>-->
+      <!--<version>3.5.0.v20150421-2214</version>-->
+    <!--</dependency>-->
+    
+    <!--<dependency>-->
+      <!--<groupId>com.reubenpeeris</groupId>-->
+      <!--<artifactId>org.eclipse.jdt.core.compiler.ecj</artifactId>-->
+      <!--<version>4.5.2-201602121500</version>-->
+    <!--</dependency>-->
+    <dependency>
+      <groupId>org.eclipse.jdt</groupId>
+      <artifactId>org.eclipse.jdt.core</artifactId>
+      <version>3.12.3</version>
+    </dependency>
+    
+
+
+    <dependency>
+      <groupId>com.google.javascript</groupId>
+      <artifactId>closure-compiler</artifactId>
+      <version>v20170409</version>
+    </dependency>
+  </dependencies>
+</project>
