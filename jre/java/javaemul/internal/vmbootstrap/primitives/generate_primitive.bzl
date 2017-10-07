@@ -5,8 +5,8 @@ def generate_primitive_type(name, **kwargs):
   """Generates src for J2CL primitive types"""
 
   # exit early to avoid parse errors when running under bazel
-  if not hasattr(native, "js_library"):
-    return
+#  if not hasattr(native, "js_library"):
+#    return
 
   templates = ["primitive.java.js", "primitive.impl.java.js"]
   native.filegroup(
