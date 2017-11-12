@@ -132,6 +132,7 @@ public class FrontendUtils {
 
     // Ensures that we will not fail if the zip already exists.
     outputPath.toFile().delete();
+    outputPath.toFile().getParentFile().mkdirs();
 
     try {
       return FileSystems.newFileSystem(
