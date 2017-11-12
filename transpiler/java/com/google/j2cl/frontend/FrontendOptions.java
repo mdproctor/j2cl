@@ -88,7 +88,7 @@ public abstract class FrontendOptions {
   private static boolean isValidExtension(String sourceFile) {
     return sourceFile.endsWith(".java")
         || sourceFile.endsWith(".srcjar")
-        || sourceFile.endsWith("-src.jar");
+        || sourceFile.endsWith(".jar");
   }
 
   private static Path getDirOutput(String output, Problems problems) {
