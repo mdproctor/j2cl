@@ -1,6 +1,10 @@
 # Apache2
 licenses(["notice"])
 
+package(default_visibility = [
+    "//:__subpackages__",
+])
+
 java_library(
     name = "transpiler_lib",
     srcs = ["J2clTranspiler.java"],
