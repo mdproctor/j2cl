@@ -102,7 +102,7 @@ import java.util.concurrent.Future;
 public class J2clTranspiler {
 
   /** Runs the entire J2CL pipeline. */
-  static Problems transpile(String[] args) {
+  public static Problems transpile(String[] args) {
     // Compiler has no static state, but rather uses thread local variables.
     // Because of this, we invoke the compiler on a different thread each time.
     Future<Problems> result =
