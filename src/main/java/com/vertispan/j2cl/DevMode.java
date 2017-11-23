@@ -208,6 +208,7 @@ public class DevMode {
             List<String> modifiedJavaFiles = new ArrayList<>();
             long pollStarted = System.currentTimeMillis();
 
+            resourceListener.resetEvents();
             try {
                 resourceListener.blockAndCollectEvents(false);
             } catch (Exception e) {
