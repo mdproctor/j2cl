@@ -147,6 +147,11 @@ alias(
 )
 
 alias(
+    name = "gwt_java_emul_test",
+    actual = "@org_gwtproject_gwt//user:java_emul_test"
+)
+
+alias(
     name = "gwt_java_emul_internal",
     actual = "@org_gwtproject_gwt//user:java_emul_internal",
 )
