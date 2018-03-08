@@ -8,7 +8,7 @@ java_test(
     name = "J2clMinifierTest",
     srcs = glob(["*.java"]),
     deps = [
-        "//third_party/java/junit",
+        "//third_party:junit",
         "//tools/java/com/google/j2cl/tools/minifier",
     ],
 )
