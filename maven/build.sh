@@ -5,6 +5,7 @@ BAZEL=${BAZEL:-bazel}
 
 ${BAZEL} build //transpiler/java/com/google/j2cl/transpiler:*
 
+${BAZEL} test //tools/...
 ${BAZEL} build //tools/java/com/google/j2cl/tools/gwtincompatible:*
 ${BAZEL} build //tools/java/com/google/j2cl/tools/minifier:*
 
