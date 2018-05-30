@@ -151,9 +151,9 @@ alias(
     actual = "@org_gwtproject_gwt//user:java_emul_internal",
 )
 
-alias(
+java_library(
     name = "gwt-javaemul-internal-annotations-j2cl",
-    actual = "@org_gwtproject_gwt//user:gwt-javaemul-internal-annotations",
+    exports = ["@org_gwtproject_gwt//user:gwt-javaemul-internal-annotations",]
 )
 
 java_library(
