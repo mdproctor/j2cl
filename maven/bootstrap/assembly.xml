@@ -15,6 +15,13 @@
       <outputDirectory>javaemul/internal/vmbootstrap</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>../../jre/java/javaemul/internal/</directory>
+      <includes>
+        <include>*.js</include>
+      </includes>
+      <outputDirectory>javaemul/internal</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>../../bazel-genfiles/jre/java/javaemul/internal/vmbootstrap/primitives</directory>
       <includes>
         <include>*.js</include>
