@@ -3,6 +3,7 @@
 set -e
 BAZEL=${BAZEL:-bazel}
 
+${BAZEL} test //transpiler/javatests/com/google/j2cl/frontend:FrontendUtilsTest
 ${BAZEL} build //transpiler/java/com/google/j2cl/transpiler:*
 
 ${BAZEL} test //tools/...
