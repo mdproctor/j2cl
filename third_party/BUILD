@@ -123,22 +123,22 @@ java_library(
 
 alias(
     name = "closure_testcase",
-    actual = "@closure_library//:testcase",
+    actual = "@com_google_javascript_closure_library//:testcase",
 )
 
 alias(
     name = "closure_reflect",
-    actual = "@closure_library//:reflect",
+    actual = "@com_google_javascript_closure_library//:reflect",
 )
 
 alias(
     name = "closure_math_long",
-    actual = "@closure_library//:math_long",
+    actual = "@com_google_javascript_closure_library//:math_long",
 )
 
 alias(
     name = "closure_base",
-    actual = "@closure_library//:base",
+    actual = "@com_google_javascript_closure_library//:base",
 )
 
 alias(
