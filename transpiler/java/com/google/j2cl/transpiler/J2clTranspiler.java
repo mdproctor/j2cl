@@ -99,10 +99,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /** Translation tool for generating JavaScript source files from Java sources. */
-class J2clTranspiler {
+public class J2clTranspiler {
 
   /** Runs the entire J2CL pipeline. */
-  static Problems transpile(J2clTranspilerOptions options) {
+  public static Problems transpile(J2clTranspilerOptions options) {
     // Compiler has no static state, but rather uses thread local variables.
     // Because of this, we invoke the compiler on a different thread each time.
     ExecutorService executorService = Executors.newSingleThreadExecutor();
