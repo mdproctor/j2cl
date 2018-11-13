@@ -134,7 +134,7 @@ public final class J2clCommandLineRunner extends CommandLineTool {
   private static boolean isValidExtension(String sourceFile) {
     return sourceFile.endsWith(".java")
         || sourceFile.endsWith(".srcjar")
-        || sourceFile.endsWith("-src.jar");
+        || sourceFile.endsWith(".jar");
   }
 
   private static Path getDirOutput(String output, Problems problems) {
