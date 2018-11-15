@@ -41,11 +41,11 @@ public class FrontendUtils {
   @AutoValue
   public abstract static class FileInfo implements Comparable<FileInfo> {
 
-    private static FileInfo create(String sourcePath, String originalPath) {
+    public static FileInfo create(String sourcePath, String originalPath) {
       return create(sourcePath, originalPath, originalPath);
     }
 
-    private static FileInfo create(String sourcePath, String originalPath, String targetPath) {
+    public static FileInfo create(String sourcePath, String originalPath, String targetPath) {
       return new AutoValue_FrontendUtils_FileInfo(sourcePath, originalPath, targetPath);
     }
 
