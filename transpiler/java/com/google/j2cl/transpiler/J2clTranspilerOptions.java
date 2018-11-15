@@ -49,6 +49,8 @@ public abstract class J2clTranspilerOptions {
 
   public abstract Frontend getFrontend();
 
+  public abstract Builder toBuilder();
+
   public static Builder newBuilder() {
     return new AutoValue_J2clTranspilerOptions.Builder().setExperimentalOptimizeAutovalue(false);
   }
