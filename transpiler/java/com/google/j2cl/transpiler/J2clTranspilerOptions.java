@@ -57,6 +57,8 @@ public abstract class J2clTranspilerOptions {
   @Nullable
   public abstract ImmutableSet<String> getWasmEntryPoints();
 
+  public abstract Builder toBuilder();
+
   public static Builder newBuilder() {
     return new AutoValue_J2clTranspilerOptions.Builder().setExperimentalOptimizeAutovalue(false);
   }
