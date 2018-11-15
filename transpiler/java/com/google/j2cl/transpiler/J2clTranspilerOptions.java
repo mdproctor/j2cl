@@ -46,6 +46,8 @@ public abstract class J2clTranspilerOptions {
 
   public abstract boolean getGenerateKytheIndexingMetadata();
 
+  public abstract Builder toBuilder();
+
   public static Builder newBuilder() {
     return new AutoValue_J2clTranspilerOptions.Builder();
   }
