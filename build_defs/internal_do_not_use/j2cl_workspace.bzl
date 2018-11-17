@@ -159,7 +159,7 @@ def setup_j2cl_workspace():
         actual = "@com_google_guava",
     )
 
-    # needed for protobuf
+    # needed for protobuf, also needed by generator
     native.bind(
         name = "gson",
         actual = "@com_google_code_gson",
