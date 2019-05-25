@@ -107,18 +107,18 @@
           </execution>
         </executions>
         <dependencies>
-          <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>junit-processor</artifactId>
-            <version>${project.version}</version>
-            <classifier>unshaded</classifier>
-          </dependency>
 
         </dependencies>
       </plugin>
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>junit-processor</artifactId>
+      <version>${project.version}</version>
+      <classifier>unshaded</classifier>
+    </dependency>
     <dependency>
       <groupId>com.google.auto</groupId>
       <artifactId>auto-common</artifactId>
