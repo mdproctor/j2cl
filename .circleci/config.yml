@@ -1,0 +1,107 @@
+version: 2
+jobs:
+  closure_library:
+    working_directory: ~/
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+    steps:
+      - restore_cache:
+          keys:
+            - v1-closure-library
+      - run:
+          name: 
+          command: |
+            if [ -e closure-library ]; then
+              # if the cache contained it, let's just update
+              git remote update
+              git pull
+            else
+              git clone https://github.com/google/closure-library.git
+            fi
+      - save_cache:
+          key: v1-closure-library
+          paths:
+            - ~/closure-library
+
+  build:
+    working_directory: ~/j2cl
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+      _JAVA_OPTIONS: "-Xms1g -Xmx1g"
+    steps:
+      - checkout
+      - run:
+          name: environment check
+          command: |
+            java -XX:+PrintFlagsFinal -version | grep -iE 'HeapSize|PermSize|ThreadStackSize'
+            env MAVEN_OPTS="-XX:+PrintFlagsFinal" mvn -version | grep -iE 'HeapSize|PermSize|ThreadStackSize'
+            mvn -version
+
+      - restore_cache:
+          keys:
+            - v0.25.2-bazel-installer
+      - run:
+          name: bazel
+          working_directory: ~/
+          command: |
+            bazel_version=0.25.2
+            if [ ! -e bazel-${bazel_version}-installer-linux-x86_64.sh ]; then 
+              curl -O -L https://github.com/bazelbuild/bazel/releases/download/$bazel_version/bazel-${bazel_version}-installer-linux-x86_64.sh
+              chmod +x bazel*.sh
+            fi
+            ./bazel-${bazel_version}-installer-linux-x86_64.sh --user
+      - save_cache:
+          key: v0.25.2-bazel-installer
+          paths:
+            - ~/*.sh
+
+      - run:
+          name: update remote
+          command: |
+            echo rebasing onto upstream
+            set +e
+            git remote get-url upstream
+            if [ $? != 0 ]; then
+              git remote add upstream https://github.com/google/j2cl/
+            fi
+            set -e
+            git remote update
+            git checkout origin/master
+
+            set +e
+            git rebase upstream/master
+            exitCode=$?;
+            set -e
+
+            if [ $exitCode != 0 ]; then
+              # not really needed
+              git rebase --abort
+              exit $exitCode;
+            fi
+
+      - restore_cache:
+          keys:
+            - v1-closure-library
+
+      - run:
+          name: build
+          command: |
+            bazel clean --expunge
+
+            cd maven
+            ./build.sh
+
+
+workflows:
+  version: 2
+  ci_build:
+    jobs:
+      - closure_library
+      - build
+
+
+
+
+
