@@ -19,10 +19,14 @@ jobs:
           command: |
             if [ -e closure-library ]; then
               # if the cache contained it, let's just update
+              echo update from remote
+
+              cd closure-library
               git remote update
               git pull
             else
-              git clone https://github.com/google/closure-library.git
+              echo cloning repository
+              git clone git@github.com:google/closure-library.git
             fi
       - save_cache:
           key: v1-closure-library
@@ -66,12 +70,19 @@ jobs:
             set +e
             git remote get-url upstream
             if [ $? != 0 ]; then
-              git remote add upstream https://github.com/google/j2cl/
+              echo adding google remote
+              git remote add upstream git@github.com:google/j2cl.git
             fi
             set -e
+            echo setup local git user
+            git config --global user.email "sales@vertispan.com"
+            git config --global user.name "Vertispan CI"
+            echo git remote update
             git remote update
+            echo git checkout origin/master
             git checkout origin/master
 
+            echo starting rebase on upstream/master
             set +e
             git rebase upstream/master
             exitCode=$?;
@@ -79,6 +90,7 @@ jobs:
 
             if [ $exitCode != 0 ]; then
               # not really needed
+              echo rebase failure
               git rebase --abort
               exit $exitCode;
             fi
@@ -101,9 +113,7 @@ workflows:
   ci_build:
     jobs:
       - closure_library
-      - build
-
-
-
-
+      - build:
+          requires:
+            - closure_library
 
