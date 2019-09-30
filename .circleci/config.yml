@@ -11,9 +11,14 @@ jobs:
     <<: *defaults
     working_directory: ~/
     steps:
+      - run:
+          name: create build cache key
+          command: echo $CIRCLE_SHA1 > .circle-sha
       - restore_cache:
           keys:
-            - v1-closure-library
+            - v1-closure-library-{{ checksum ".circle-sha" }}
+            # if cache is not present load any most recent
+            - v1-closure-library-
       - run:
           name: 
           command: |
@@ -26,10 +31,10 @@ jobs:
               git pull
             else
               echo cloning repository
-              git clone git@github.com:google/closure-library.git
+              git clone https://github.com/google/closure-library
             fi
       - save_cache:
-          key: v1-closure-library
+          key: v1-closure-library-{{ checksum ".circle-sha" }}
           paths:
             - ~/closure-library
 
@@ -38,6 +43,9 @@ jobs:
     working_directory: ~/j2cl
     steps:
       - checkout
+      - run:
+          name: create build cache key
+          command: echo $CIRCLE_SHA1 > .circle-sha
       - run:
           name: environment check
           command: |
@@ -84,8 +92,10 @@ jobs:
 
             echo starting rebase on upstream/master
             set +e
-            git rebase upstream/master
-            exitCode=$?;
+            # temp comment out the rebase to test build
+            #git rebase upstream/master
+            #exitCode=$?;
+            exitCode=0
             set -e
 
             if [ $exitCode != 0 ]; then
@@ -97,7 +107,9 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-closure-library
+            - v1-closure-library-{{ checksum ".circle-sha" }}
+            # if cache is not present load any most recent - shouldn't happen by this point of build
+            - v1-closure-library-
 
       - run:
           name: build
