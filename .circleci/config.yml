@@ -55,19 +55,20 @@ jobs:
 
       - restore_cache:
           keys:
-            - v0.25.2-bazel-installer
+            - bazel-installer-{{ checksum ".bazelversion" }}
+            - bazel-installer-
       - run:
           name: bazel
           working_directory: ~/
           command: |
-            bazel_version=0.25.2
+            bazel_version=$(cat j2cl/.bazelversion)
             if [ ! -e bazel-${bazel_version}-installer-linux-x86_64.sh ]; then 
               curl -O -L https://github.com/bazelbuild/bazel/releases/download/$bazel_version/bazel-${bazel_version}-installer-linux-x86_64.sh
               chmod +x bazel*.sh
             fi
             ./bazel-${bazel_version}-installer-linux-x86_64.sh --user
       - save_cache:
-          key: v0.25.2-bazel-installer
+          key: bazel-installer-{{ checksum ".bazelversion" }}
           paths:
             - ~/*.sh
 
