@@ -1,9 +1,15 @@
+defaults: &defaults
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+      _JAVA_OPTIONS: "-Xms1g -Xmx1g"
+
 version: 2
 jobs:
   closure_library:
+    <<: *defaults
     working_directory: ~/
-    docker:
-      - image: circleci/openjdk:8-jdk-stretch
     steps:
       - restore_cache:
           keys:
@@ -24,12 +30,8 @@ jobs:
             - ~/closure-library
 
   build:
+    <<: *defaults
     working_directory: ~/j2cl
-    docker:
-      - image: circleci/openjdk:8-jdk-stretch
-    environment:
-      MAVEN_OPTS: -Xmx3200m
-      _JAVA_OPTIONS: "-Xms1g -Xmx1g"
     steps:
       - checkout
       - run:
