@@ -115,6 +115,8 @@ jobs:
       - run:
           name: build
           command: |
+            # limit the bazel jobs due to failures in circleci
+            echo "build --jobs=1" >> .bazelrc
             bazel clean --expunge
 
             cd maven
