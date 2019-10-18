@@ -1,9 +1,6 @@
 defaults: &defaults
     docker:
-      - image: circleci/openjdk:8-jdk-stretch
-    environment:
-      MAVEN_OPTS: -Xmx3200m
-      _JAVA_OPTIONS: "-Xms1g -Xmx1g"
+      - image: vertispan/openjdk:8u222-jdk-stretch
 
 version: 2
 jobs:
@@ -15,12 +12,13 @@ jobs:
           name: create build cache key
           command: echo $CIRCLE_SHA1 > .circle-sha
       - restore_cache:
+          name: Restoring Cache - closure-library
           keys:
             - v1-closure-library-{{ checksum ".circle-sha" }}
             # if cache is not present load any most recent
             - v1-closure-library-
       - run:
-          name: 
+          name: update or clone closure-library
           command: |
             if [ -e closure-library ]; then
               # if the cache contained it, let's just update
@@ -34,6 +32,7 @@ jobs:
               git clone https://github.com/google/closure-library
             fi
       - save_cache:
+          name: Saving Cache - closure-library
           key: v1-closure-library-{{ checksum ".circle-sha" }}
           paths:
             - ~/closure-library
@@ -53,27 +52,8 @@ jobs:
             env MAVEN_OPTS="-XX:+PrintFlagsFinal" mvn -version | grep -iE 'HeapSize|PermSize|ThreadStackSize'
             mvn -version
 
-      - restore_cache:
-          keys:
-            - bazel-installer-{{ checksum ".bazelversion" }}
-            - bazel-installer-
       - run:
-          name: bazel
-          working_directory: ~/
-          command: |
-            bazel_version=$(cat j2cl/.bazelversion)
-            if [ ! -e bazel-${bazel_version}-installer-linux-x86_64.sh ]; then 
-              curl -O -L https://github.com/bazelbuild/bazel/releases/download/$bazel_version/bazel-${bazel_version}-installer-linux-x86_64.sh
-              chmod +x bazel*.sh
-            fi
-            ./bazel-${bazel_version}-installer-linux-x86_64.sh --user
-      - save_cache:
-          key: bazel-installer-{{ checksum ".bazelversion" }}
-          paths:
-            - ~/*.sh
-
-      - run:
-          name: update remote
+          name: Rebase j2cl onto google upstream changes
           command: |
             echo rebasing onto upstream
             set +e
@@ -106,22 +86,42 @@ jobs:
             fi
 
       - restore_cache:
+          name: Restoring Cache - closure-library
           keys:
             - v1-closure-library-{{ checksum ".circle-sha" }}
             # if cache is not present load any most recent - shouldn't happen by this point of build
             - v1-closure-library-
 
       - run:
-          name: build
+          name: Initialize Bazel
           command: |
             # limit the bazel jobs due to failures in circleci
             echo "build --jobs=1" >> .bazelrc
             echo "build --local_ram_resources=HOST_RAM*.1" >> .bazelrc
-            echo "build --local_cpu_resources=1" >> .bazelrc
+            echo "--host_jvm_args=-Xmx1g" >> .bazelrc
             bazel clean --expunge
-
+      - run:
+          name: Run build
+          command: |
             cd maven
+            # try up to 4 times
             ./build.sh || ./build.sh || ./build.sh || ./build.sh
+      - restore_cache:
+          name:  Restoring Cache - m2 repository
+          keys:
+            - v1-dependencies-{{ checksum "maven/pom.xml" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Deploy jars
+          command: |
+            cd maven
+            mvn deploy -s ../.circleci/settings.xml -Dartifactory.username=$ARTIFACTORY_USER -Dartifactory.password=$ARTIFACTORY_APIKEY
+      - save_cache:
+          name:  Save Cache - m2 repository
+          paths:
+            - ~/.m2/repository
+          key: v1-dependencies-{{ checksum "maven/pom.xml" }}
 
 
 workflows:
