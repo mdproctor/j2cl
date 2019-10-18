@@ -94,9 +94,8 @@ jobs:
             echo starting rebase on upstream/master
             set +e
             # temp comment out the rebase to test build
-            #git rebase upstream/master
-            #exitCode=$?;
-            exitCode=0
+            git rebase upstream/master
+            exitCode=$?;
             set -e
 
             if [ $exitCode != 0 ]; then
