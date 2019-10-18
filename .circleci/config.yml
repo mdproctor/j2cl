@@ -117,10 +117,12 @@ jobs:
           command: |
             # limit the bazel jobs due to failures in circleci
             echo "build --jobs=1" >> .bazelrc
+            echo "build --local_ram_resources=HOST_RAM*.1" >> .bazelrc
+            echo "build --local_cpu_resources=1" >> .bazelrc
             bazel clean --expunge
 
             cd maven
-            ./build.sh
+            ./build.sh || ./build.sh || ./build.sh || ./build.sh
 
 
 workflows:
