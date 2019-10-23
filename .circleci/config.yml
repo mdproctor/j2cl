@@ -97,8 +97,8 @@ jobs:
           command: |
             # limit the bazel jobs due to failures in circleci
             echo "build --jobs=1" >> .bazelrc
-            echo "build --local_ram_resources=HOST_RAM*.1" >> .bazelrc
-            echo "--host_jvm_args=-Xmx1g" >> .bazelrc
+            echo "build --local_ram_resources=512" >> .bazelrc
+            echo "--host_jvm_args=-Xmx512m" >> .bazelrc
             bazel clean --expunge
       - run:
           name: Run build
