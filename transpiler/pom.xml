@@ -404,15 +404,12 @@
     <sourceDirectory>java</sourceDirectory>
     <testSourceDirectory>javatests</testSourceDirectory>
 
-
-
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
-          <forceJavacCompilerUse>true</forceJavacCompilerUse>
         </configuration>
       </plugin>
 
