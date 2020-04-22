@@ -19,8 +19,8 @@ package com.google.j2cl.bazel;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
-import com.google.devtools.build.lib.worker.WorkerProtocol.WorkRequest;
-import com.google.devtools.build.lib.worker.WorkerProtocol.WorkResponse;
+//import com.google.devtools.build.lib.worker.WorkerProtocol.WorkRequest;
+//import com.google.devtools.build.lib.worker.WorkerProtocol.WorkResponse;
 import com.google.j2cl.common.Problems;
 import java.io.File;
 import java.io.IOException;
@@ -83,29 +83,29 @@ public abstract class BazelWorker {
   }
 
   private static void runPersistentWorker(Supplier<BazelWorker> workerSupplier) throws IOException {
-    while (true) {
-      WorkRequest request = WorkRequest.parseDelimitedFrom(System.in);
-
-      if (request == null) {
-        break;
-      }
-
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      String[] args = request.getArgumentsList().toArray(new String[0]);
-      int exitCode = workerSupplier.get().processRequest(args).reportAndGetExitCode(pw);
-      WorkResponse.newBuilder()
-          .setOutput(sw.toString())
-          .setExitCode(exitCode)
-          .build()
-          .writeDelimitedTo(System.out);
-      System.out.flush();
-
-      // Hint to the system that now would be a good time to run a gc.  After a compile
-      // completes lots of objects should be available for collection and it should be cheap to
-      // collect them.
-      System.gc();
-    }
+//    while (true) {
+//      WorkRequest request = WorkRequest.parseDelimitedFrom(System.in);
+//
+//      if (request == null) {
+//        break;
+//      }
+//
+//      StringWriter sw = new StringWriter();
+//      PrintWriter pw = new PrintWriter(sw);
+//      String[] args = request.getArgumentsList().toArray(new String[0]);
+//      int exitCode = workerSupplier.get().processRequest(args).reportAndGetExitCode(pw);
+//      WorkResponse.newBuilder()
+//          .setOutput(sw.toString())
+//          .setExitCode(exitCode)
+//          .build()
+//          .writeDelimitedTo(System.out);
+//      System.out.flush();
+//
+//      // Hint to the system that now would be a good time to run a gc.  After a compile
+//      // completes lots of objects should be available for collection and it should be cheap to
+//      // collect them.
+//      System.gc();
+//    }
   }
 
   /**
