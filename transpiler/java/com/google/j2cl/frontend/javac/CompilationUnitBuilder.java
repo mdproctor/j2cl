@@ -1053,19 +1053,20 @@ public class CompilationUnitBuilder extends AbstractCompilationUnitBuilder {
           getSourcePosition(memberReference));
     }
 
-    MethodDescriptor targetMethodDescriptor =
-        environment.createMethodDescriptor(
-            (ExecutableType) memberReference.referentType,
-            memberReference.referentType.getReturnType(),
-            methodSymbol);
+    MethodDescriptor targetMethodDescriptor = null;
+//        environment.createMethodDescriptor(
+//            (ExecutableType) memberReference.referentType,
+//            memberReference.referentType.getReturnType(),
+//            methodSymbol);
+
     if (methodSymbol.isConstructor()) {
-      TypeMirror type = memberReference.referentType.getReturnType();
-      if (((com.sun.tools.javac.code.Type) type).isReference()) {
-        targetMethodDescriptor =
-            MethodDescriptor.Builder.from(targetMethodDescriptor)
-                .setEnclosingTypeDescriptor(environment.createDeclaredTypeDescriptor(type))
-                .build();
-      }
+//      TypeMirror type = memberReference.referentType.getReturnType();
+//      if (((com.sun.tools.javac.code.Type) type).isReference()) {
+//        targetMethodDescriptor =
+//            MethodDescriptor.Builder.from(targetMethodDescriptor)
+//                .setEnclosingTypeDescriptor(environment.createDeclaredTypeDescriptor(type))
+//                .build();
+//      }
 
       Expression qualifier =
           targetMethodDescriptor
@@ -1569,14 +1570,14 @@ public class CompilationUnitBuilder extends AbstractCompilationUnitBuilder {
 
   private CompilationUnit build(JCCompilationUnit javacUnit) {
     this.javacUnit = javacUnit;
-    if (javacUnit.getSourceFile().getName().endsWith("package-info.java")
-        && javacUnit.getPackage() != null) {
-      String packageName = javacUnit.getPackageName().toString();
-      String packageJsNamespace = getPackageJsNamespace(javacUnit);
-      PackageInfoCache.get()
-          .setPackageJsNamespace(
-              PackageInfoCache.SOURCE_CLASS_PATH_ENTRY, packageName, packageJsNamespace);
-    }
+//    if (javacUnit.getSourceFile().getName().endsWith("package-info.java")
+//        && javacUnit.getPackage() != null) {
+//      String packageName = javacUnit.getPackageName().toString();
+//      String packageJsNamespace = getPackageJsNamespace(javacUnit);
+//      PackageInfoCache.get()
+//          .setPackageJsNamespace(
+//              PackageInfoCache.SOURCE_CLASS_PATH_ENTRY, packageName, packageJsNamespace);
+//    }
     setCurrentCompilationUnit(
         new CompilationUnit(
             javacUnit.getSourceFile().getName(),
