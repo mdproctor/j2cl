@@ -30,6 +30,7 @@ import com.google.j2cl.transpiler.J2clCommandLineRunner;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,10 +56,13 @@ public class TranspilerTester {
    * Creates a new transpiler tester initialized with the defaults (e.g. location for the JRE, etc)
    */
   public static TranspilerTester newTesterWithDefaults() {
+//    URL res = TranspilerTester.class.getClassLoader().getResource("/jre-0.7-20200410.190227-4.jar");
+//    System.out.println(res.getFile());
+
     return newTester()
         .setJavaPackage("test")
-        .setClassPath(
-            "transpiler/javatests/com/google/j2cl/transpiler/integration/jre_bundle_deploy.jar");
+        .setClassPath("jre-0.7-20200410.190227-4.jar");
+
   }
 
   private static class File {

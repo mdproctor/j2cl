@@ -317,6 +317,13 @@
     </dependency>
 
     <!-- j2cl dependencies -->
+<!--    <dependency>-->
+<!--      <groupId>com.vertispan.j2cl</groupId>-->
+<!--      <artifactId>jre</artifactId>-->
+<!--      &lt;!&ndash; mused used excplicit version &ndash;&gt;-->
+<!--      <version>0.7-20200410.190227-4</version>-->
+<!--    </dependency>-->
+
     <!--dependency>
       <groupId>com.vertispan.j2cl</groupId>
       <artifactId>transpiler</artifactId>
