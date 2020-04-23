@@ -61,8 +61,7 @@ public class TranspilerTester {
 
     return newTester()
         .setJavaPackage("test")
-        .setClassPath("jre-0.7-20200410.190227-4.jar");
-
+        .setClassPath("jre-0.7-20200410.190227-4.jar:jsinterop-annotations-2.0.0.jar");
   }
 
   private static class File {

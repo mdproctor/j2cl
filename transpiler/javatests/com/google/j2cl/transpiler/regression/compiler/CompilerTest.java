@@ -23,6 +23,8 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.Locale;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -843,14 +845,15 @@ public class CompilerTest {
     }
   }
 
-  /** Issue #615: Internal Compiler Error. */
-  @Test
-  public void testImplicitNull() {
-    boolean b;
-    String test = ((((b = true) ? null : null) + " ") + b);
-    assertTrue(b);
-    assertEquals("null true", test);
-  }
+//  /** Issue #615: Internal Compiler Error. */
+//  @Test
+//  @Ignore
+//  public void testImplicitNull() {
+//    boolean b;
+//    String test = ((((b = true) ? null : null) + " ") + b);
+//    assertTrue(b);
+//    assertEquals("null true", test);
+//  }
 
   /**
    * Issue 2886: inlining should cope with local variables that do not have an explicit declaration

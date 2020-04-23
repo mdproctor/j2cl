@@ -435,6 +435,17 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M4</version>
+        <configuration>
+          <forkCount>1</forkCount>
+          <reuseForks>true</reuseForks>
+          <argLine>-Xmx1024m -XX:MaxPermSize=256m -Xbootclasspath/a:/Users/mdproctor/dev/j2cl/transpiler/libjre_bootclasspath.jar</argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>${maven.version}</version>
       </plugin>
