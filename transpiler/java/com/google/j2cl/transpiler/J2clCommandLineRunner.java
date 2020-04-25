@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.j2cl.frontend.TranspileContext;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 
@@ -77,15 +79,16 @@ public final class J2clCommandLineRunner extends CommandLineTool {
       metaVar = "(JDT | JAVAC)",
       usage = "Select the frontend to use: JDT (default), JAVAC (experimental).",
       hidden = true)
-  protected Frontend frontEnd = Frontend.JDT;
+  protected Frontend frontEnd = Frontend.JAVAC;
 
   private J2clCommandLineRunner() {
     super("j2cl");
   }
 
   @Override
-  protected Problems run() {
-    return J2clTranspiler.transpile(createOptions());
+  protected Problems run(Object ctx) {
+    J2clTranspilerOptions options = createOptions();
+    return J2clTranspiler.transpile(options, (TranspileContext) ctx);
   }
 
   private J2clTranspilerOptions createOptions() {
@@ -143,11 +146,11 @@ public final class J2clCommandLineRunner extends CommandLineTool {
   }
 
   // Exists for testing, should be removed when tests stop using flags.
-  static Problems runForTest(String[] args) {
-    return new J2clCommandLineRunner().processRequest(args);
+  static Problems runForTest(String[] args, Object ctx) {
+    return new J2clCommandLineRunner().processRequest(args, ctx);
   }
 
   public static void main(String[] args) {
-    new J2clCommandLineRunner().execute(args);
+    new J2clCommandLineRunner().execute(args, null);
   }
 }

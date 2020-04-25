@@ -42,6 +42,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import com.google.j2cl.frontend.TranspileContext;
 import junit.framework.Assert;
 
 /** Apis for end to end tests on the transpiler. */
@@ -53,15 +55,28 @@ public class TranspilerTester {
 
   /**
    * Creates a new transpiler tester initialized with the defaults (e.g. location for the JRE, etc)
+   * @param classesOutPath
    */
   public static TranspilerTester newTesterWithDefaults() {
     return newTester()
+            .setJavaPackage("test")
+            .setClassPath(
+                    System.getProperty("TEST_PATH_PREFIX", "") + "transpiler/javatests/com/google/j2cl/transpiler/integration/jre_bundle_deploy.jar");
+  }
+
+  /**
+   * Creates a new transpiler tester initialized with the defaults (e.g. location for the JRE, etc)
+   * @param classesOutPath
+   */
+  public static TranspilerTester newTesterWithDefaults(Path classesOutPath) {
+    return newTester()
         .setJavaPackage("test")
+        .setClassesOutPath(classesOutPath)
         .setClassPath(
             System.getProperty("TEST_PATH_PREFIX", "") + "transpiler/javatests/com/google/j2cl/transpiler/integration/jre_bundle_deploy.jar");
   }
 
-  private static class File {
+  public static class File {
     private Path filePath;
     private String content;
 
@@ -82,15 +97,15 @@ public class TranspilerTester {
       }
     }
 
-    private boolean isNativeJsFile() {
+    public boolean isNativeJsFile() {
       return filePath.toString().endsWith(".native.js");
     }
 
-    private boolean isJavaSourceFile() {
+    public boolean isJavaSourceFile() {
       return filePath.toString().endsWith(".java");
     }
 
-    private boolean isSrcJar() {
+    public boolean isSrcJar() {
       return filePath.toString().endsWith(".srcjar");
     }
   }
@@ -99,7 +114,14 @@ public class TranspilerTester {
   private List<String> args = new ArrayList<>();
   private String temporaryDirectoryPrefix = "transpile_tester";
   private String packageName = "";
-  private Path outputPath;
+  private Path             outputPath;
+  private Path             classesOutPath;
+  private String             classPath;
+  private TranspileContext ctx;
+
+  public TranspilerTester applyChangeSet() {
+    return this;
+  }
 
   public TranspilerTester addCompilationUnit(String compilationUnitName, String... code) {
     List<String> content = new ArrayList<>(Arrays.asList(code));
@@ -124,8 +146,18 @@ public class TranspilerTester {
     return this;
   }
 
+  public Path getClassesOutPath() {
+    return classesOutPath;
+  }
+
   public TranspilerTester setClassPath(String path) {
-    return this.addArgs("-cp", toTestPath(path));
+    if ( classesOutPath != null ) {
+      classPath = toTestPath(path) + ":" + toTestPath(classesOutPath.toAbsolutePath().toString());
+    } else {
+      classPath = toTestPath(path);
+    }
+
+    return this.addArgs("-cp", classPath);
   }
 
   public TranspilerTester setNativeSourcePath(String path) {
@@ -168,12 +200,27 @@ public class TranspilerTester {
     return this;
   }
 
+  public TranspilerTester setClassesOutPath(Path classesOutPath) {
+    this.classesOutPath = classesOutPath;
+    return this;
+  }
+
+  public TranspilerTester setTranspileContext(TranspileContext ctx) {
+    this.ctx = ctx;
+    return this;
+  }
+
   public TranspileResult assertTranspileSucceeds() {
-    return transpile().assertNoErrors();
+    return transpile(ctx).assertNoErrors();
+  }
+
+  public TranspilerTester compile() {
+    compile(ctx);
+    return this;
   }
 
   public TranspileResult assertTranspileFails() {
-    return transpile().assertHasErrors();
+    return transpile(ctx).assertHasErrors();
   }
 
   /** A bundle of data recording the results of a transpile operation. */
@@ -312,9 +359,9 @@ public class TranspilerTester {
     }
   }
 
-  private static TranspileResult invokeTranspiler(Iterable<String> args, Path outputPath) {
+  private static TranspileResult invokeTranspiler(Iterable<String> args, Path outputPath, TranspileContext ctx) {
     try {
-      return new TranspileResult(transpile(args), outputPath);
+      return new TranspileResult(transpile(args, ctx), outputPath);
     } catch (Exception e) {
       e.printStackTrace();
       Problems problems = new Problems();
@@ -323,16 +370,53 @@ public class TranspilerTester {
     }
   }
 
-  private static Problems transpile(Iterable<String> args) throws Exception {
+  private static Problems transpile(Iterable<String> args, TranspileContext ctx) throws Exception {
     // J2clCommandLineRunner.run is hidden since we don't want it to be used as an entry point. As a
     // result we use reflection here to invoke it.
     Method transpileMethod =
-        J2clCommandLineRunner.class.getDeclaredMethod("runForTest", String[].class);
+        J2clCommandLineRunner.class.getDeclaredMethod("runForTest", String[].class, Object.class);
     transpileMethod.setAccessible(true);
-    return (Problems) transpileMethod.invoke(null, (Object) Iterables.toArray(args, String.class));
+    Problems problems = (Problems) transpileMethod.invoke(null, (Object) Iterables.toArray(args, String.class), ctx);
+    return problems;
   }
 
-  private TranspileResult transpile() {
+  private Problems compile(TranspileContext ctx) {
+    Problems problems = null;
+
+    try {
+      Path tempDir = null;
+
+      tempDir = Files.createTempDirectory(temporaryDirectoryPrefix);
+
+      if (tempDir != null && !files.isEmpty()) {
+        // 1. Create an input directory
+        Path inputPath = tempDir.resolve("input");
+        Files.createDirectories(inputPath);
+
+        checkState(!packageName.contains(".") && !packageName.contains("/"));
+        Path packagePath = inputPath.resolve(packageName);
+        Files.createDirectories(packagePath);
+
+        // 2. Create all declared files on disk
+        files.forEach(file -> file.createFileIn(inputPath));
+
+        List<String> fileNames = files.stream()
+             .filter(Predicates.or(File::isJavaSourceFile, File::isSrcJar))
+             .map(file -> inputPath.resolve(file.getFilePath()))
+             .map(Path::toAbsolutePath)
+             .map(Path::toString)
+             .collect(toImmutableList());
+        problems = new JavacHelper().compile(fileNames, classPath, classesOutPath.toFile());
+
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return problems;
+  }
+
+  private TranspileResult transpile(TranspileContext ctx) {
     try {
       Path tempDir = Files.createTempDirectory(temporaryDirectoryPrefix);
 
@@ -379,7 +463,7 @@ public class TranspilerTester {
       // Passthru explicitly defined args
       commandLineArgsBuilder.addAll(args);
 
-      return invokeTranspiler(commandLineArgsBuilder.build(), outputPath);
+      return invokeTranspiler(commandLineArgsBuilder.build(), outputPath, ctx);
     } catch (IOException e) {
       throw new AssertionError(e);
     }

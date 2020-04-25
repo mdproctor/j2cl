@@ -23,6 +23,7 @@ import com.google.j2cl.frontend.javac.JavacParser;
 import com.google.j2cl.frontend.jdt.CompilationUnitBuilder;
 import com.google.j2cl.frontend.jdt.CompilationUnitsAndTypeBindings;
 import com.google.j2cl.frontend.jdt.JdtParser;
+
 import java.util.List;
 
 /** Drives the frontend to parse, type check and resolve Java source code. */
@@ -30,10 +31,11 @@ public enum Frontend {
   JDT {
     @Override
     public List<CompilationUnit> getCompilationUnits(
-        List<String> classPath,
-        List<FileInfo> sources,
-        boolean useTargetClassPath,
-        Problems problems) {
+            List<String> classPath,
+            List<FileInfo> sources,
+            boolean useTargetClassPath,
+            TranspileContext ctx,
+            Problems problems) {
       CompilationUnitsAndTypeBindings jdtUnitsAndResolvedBindings =
           createJdtUnitsAndResolveBindings(classPath, sources, useTargetClassPath, problems);
       return convertUnits(jdtUnitsAndResolvedBindings, classPath, problems);
@@ -62,20 +64,21 @@ public enum Frontend {
   JAVAC {
     @Override
     public List<CompilationUnit> getCompilationUnits(
-        List<String> classPath,
-        List<FileInfo> sources,
-        boolean useTargetClassPath,
-        Problems problems) {
+            List<String> classPath,
+            List<FileInfo> sources,
+            boolean useTargetClassPath,
+            TranspileContext ctx, Problems problems) {
       init(classPath, problems);
       return new JavacParser(classPath, problems).parseFiles(sources, useTargetClassPath);
     }
   };
 
   public abstract List<CompilationUnit> getCompilationUnits(
-      List<String> classPath,
-      List<FileInfo> sources,
-      boolean useTargetClassPath,
-      Problems problems);
+          List<String> classPath,
+          List<FileInfo> sources,
+          boolean useTargetClassPath,
+          TranspileContext ctx,
+          Problems problems);
 
   private static void init(List<String> classPath, Problems problems) {
     // Records information about package-info files supplied as byte code.

@@ -5,3 +5,11 @@
 # See https://github.com/github/gitignore/tree/master/Global for a list of global ignore rules.
 /bazel-*
 /samples/helloworld/bazel-*
+/bazel-bin/
+/bazel-j2cl/
+/bazel-out/
+/bazel-testlogs/
+/lib
+target/
+*.iml
+.idea/
