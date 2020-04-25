@@ -58,7 +58,7 @@ public class TranspilerTester {
     return newTester()
         .setJavaPackage("test")
         .setClassPath(
-            "transpiler/javatests/com/google/j2cl/transpiler/integration/jre_bundle_deploy.jar");
+            System.getProperty("TEST_PATH_PREFIX", "") + "transpiler/javatests/com/google/j2cl/transpiler/integration/jre_bundle_deploy.jar");
   }
 
   private static class File {

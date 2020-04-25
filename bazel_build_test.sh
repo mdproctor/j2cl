@@ -21,6 +21,8 @@ bazel build :all {jre,transpiler,tools}/java/...
 # Do a quick smoke check of integration test
 bazel test transpiler/javatests/com/google/j2cl/transpiler/integration/emptyclass/...
 
+bazel clean
+
 # build hello world sample in its own workspace
 (cd samples/helloworld && bazel build src/main/...)
 
