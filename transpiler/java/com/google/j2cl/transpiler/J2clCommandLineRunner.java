@@ -79,13 +79,22 @@ public final class J2clCommandLineRunner extends CommandLineTool {
       hidden = true)
   protected Frontend frontEnd = Frontend.JDT;
 
+  @Option(
+          name = "-writeTypeGraph",
+          usage = "Writes the type grpah to disk. Default is off.",
+          hidden = true)
+  protected boolean writeTypeGraph = false;
+
   private J2clCommandLineRunner() {
     super("j2cl");
   }
 
   @Override
   protected Problems run() {
-    return J2clTranspiler.transpile(createOptions());
+    J2clTranspilerOptions options = createOptions();
+    //System.out.println(options.toString());
+    Problems p = J2clTranspiler.transpile(options);
+    return p;
   }
 
   private J2clTranspilerOptions createOptions() {
@@ -98,7 +107,7 @@ public final class J2clCommandLineRunner extends CommandLineTool {
       this.readableSourceMaps = false;
     }
 
-    return J2clTranspilerOptions.newBuilder()
+    J2clTranspilerOptions options =  J2clTranspilerOptions.newBuilder()
         .setSources(
             FrontendUtils.getAllSources(this.files, problems)
                 .filter(p -> p.sourcePath().endsWith(".java"))
@@ -116,7 +125,10 @@ public final class J2clCommandLineRunner extends CommandLineTool {
         .setEmitReadableLibraryInfo(false)
         .setGenerateKytheIndexingMetadata(this.generateKytheIndexingMetadata)
         .setFrontend(this.frontEnd)
+        .setWriteTypeGraph(this.writeTypeGraph)
         .build();
+
+    return options;
   }
 
   private static Path getDirOutput(String output, Problems problems) {

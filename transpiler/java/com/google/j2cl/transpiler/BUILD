@@ -16,6 +16,7 @@ java_library(
         "//transpiler/java/com/google/j2cl/common",
         "//transpiler/java/com/google/j2cl/frontend",
         "//transpiler/java/com/google/j2cl/generator",
+        "//transpiler/java/com/google/j2cl/transpiler/incremental",
     ],
 )
 
@@ -77,6 +78,21 @@ java_binary(
     main_class = "com.google.j2cl.transpiler.BazelJ2clBuilder",
     visibility = ["//build_defs/internal_do_not_use:__pkg__"],
     runtime_deps = [":bazelbuilder_lib"],
+)
+
+java_library(
+    name = "transpiler_options_lib",
+    srcs = [
+        "J2clTranspilerOptions.java",
+    ],
+    visibility = ["//transpiler/java/com/google/j2cl/transpiler:__subpackages__",
+                  "//transpiler/javatests/com/google/j2cl/transpiler:__subpackages__"],
+    deps = [
+        "//third_party:auto_value",
+        "//third_party:guava",
+        "//transpiler/java/com/google/j2cl/common",
+        "//transpiler/java/com/google/j2cl/frontend",
+    ],
 )
 
 # Temporary support for selecting frontend. Once javac becomes the frontend for J2CL this will be
