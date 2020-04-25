@@ -88,6 +88,8 @@ import com.google.j2cl.ast.visitors.VerifyVariableScoping;
 import com.google.j2cl.common.Problems;
 import com.google.j2cl.common.Problems.FatalError;
 import com.google.j2cl.generator.OutputGeneratorStage;
+import com.google.j2cl.transpiler.incremental.TypeGraphManager;
+
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.util.List;
@@ -125,6 +127,9 @@ class J2clTranspiler {
   private final Problems problems = new Problems();
   private final J2clTranspilerOptions options;
 
+  // This is just here for test, to test it's internal state
+  private TypeGraphManager typeGraphManager;
+
   private J2clTranspiler(J2clTranspilerOptions options) {
     this.options = options;
   }
@@ -132,17 +137,21 @@ class J2clTranspiler {
   private Problems transpileImpl() {
     try {
       List<CompilationUnit> j2clUnits =
-          options
-              .getFrontend()
-              .getCompilationUnits(
-                  options.getClasspaths(),
-                  options.getSources(),
-                  options.getGenerateKytheIndexingMetadata(),
-                  problems);
+              options.getFrontend()
+                     .getCompilationUnits(
+                          options.getClasspaths(),
+                          options.getSources(),
+                          options.getGenerateKytheIndexingMetadata(),
+                          problems);
       if (!j2clUnits.isEmpty()) {
         checkUnits(j2clUnits);
         normalizeUnits(j2clUnits);
       }
+
+      if (options.getWriteTypeGraph() && !problems.hasErrors()) {
+        this.typeGraphManager = TypeGraphManager.writeGraph(options, j2clUnits);
+      }
+
       generateOutputs(j2clUnits);
       return problems;
     } catch (Problems.Exit e) {
@@ -299,5 +308,9 @@ class J2clTranspiler {
         problems.fatal(FatalError.CANNOT_CLOSE_ZIP, e.getMessage());
       }
     }
+  }
+
+  TypeGraphManager getTypeGraphManager() {
+    return typeGraphManager;
   }
 }

@@ -133,6 +133,7 @@ final class BazelJ2clBuilder extends BazelWorker {
         .setGenerateKytheIndexingMetadata(this.generateKytheIndexingMetadata)
         .setExperimentalOptimizeAutovalue(this.experimentalOptimizeAutovalue)
         .setFrontend(FRONTEND)
+        .setWriteTypeGraph(false) // not enabling this from bazel yet
         .build();
   }
 
