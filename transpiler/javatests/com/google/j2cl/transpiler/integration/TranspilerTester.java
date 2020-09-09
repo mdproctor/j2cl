@@ -17,18 +17,25 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.j2cl.transpiler.J2clCommandLineRunner.getPathEntries;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.MoreFiles;
 import com.google.common.truth.Correspondence;
+import com.google.common.util.concurrent.Uninterruptibles;
+import com.google.j2cl.common.FrontendUtils;
 import com.google.j2cl.common.J2clUtils;
 import com.google.j2cl.common.Problems;
+import com.google.j2cl.frontend.Frontend;
+import com.google.j2cl.incremental.IncrementalManager;
 import com.google.j2cl.transpiler.J2clCommandLineRunner;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -38,12 +45,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.google.j2cl.frontend.TranspileContext;
+import com.google.j2cl.transpiler.J2clTranspiler;
+import com.google.j2cl.transpiler.J2clTranspilerOptions;
 import junit.framework.Assert;
 
 /** Apis for end to end tests on the transpiler. */
@@ -110,16 +122,24 @@ public class TranspilerTester {
     }
   }
 
-  private List<File> files = new ArrayList<>();
-  private List<String> args = new ArrayList<>();
-  private String temporaryDirectoryPrefix = "transpile_tester";
-  private String packageName = "";
-  private Path             outputPath;
-  private Path             classesOutPath;
+  private List<File>         files = new ArrayList<>();
+  private List<String>       args = new ArrayList<>();
+  private String             temporaryDirectoryPrefix = "transpile_tester";
+  private String             packageName = "";
+  private Path outputPath;
+  private Path tempPath;
+  private Path classesOutPath;
   private String             classPath;
-  private TranspileContext ctx;
+  private boolean            indirect = true;
+  private boolean            incremental = false;
 
-  public TranspilerTester applyChangeSet() {
+  public TranspilerTester setIndirect(boolean indirect) {
+    this.indirect = indirect;
+    return this;
+  }
+
+  public TranspilerTester setIncremental(boolean incremental) {
+    this.incremental = incremental;
     return this;
   }
 
@@ -200,37 +220,37 @@ public class TranspilerTester {
     return this;
   }
 
+  public TranspilerTester setTempPath(Path tempPath) {
+    this.tempPath = tempPath;
+    return this;
+  }
+
   public TranspilerTester setClassesOutPath(Path classesOutPath) {
     this.classesOutPath = classesOutPath;
     return this;
   }
-
-  public TranspilerTester setTranspileContext(TranspileContext ctx) {
-    this.ctx = ctx;
-    return this;
-  }
-
   public TranspileResult assertTranspileSucceeds() {
-    return transpile(ctx).assertNoErrors();
-  }
-
-  public TranspilerTester compile() {
-    compile(ctx);
-    return this;
+    return transpile().assertNoErrors();
   }
 
   public TranspileResult assertTranspileFails() {
-    return transpile(ctx).assertHasErrors();
+    return transpile().assertHasErrors();
   }
 
   /** A bundle of data recording the results of a transpile operation. */
   public static class TranspileResult {
     private final Problems problems;
-    private final Path outputPath;
+    private final Path               outputPath;
+    private final IncrementalManager incrementalManager;
 
     public TranspileResult(Problems problems, Path outputPath) {
+      this(problems, outputPath, null);
+    }
+
+    public TranspileResult(Problems problems, Path outputPath, IncrementalManager incrementalManager) {
       this.problems = problems;
       this.outputPath = outputPath;
+      this.incrementalManager = incrementalManager;
     }
 
     public Problems getProblems() {
@@ -245,6 +265,10 @@ public class TranspilerTester {
       Path outputFilePath = outputPath.resolve(outputFile);
       assertThat(outputFilePath.toFile().exists()).isTrue();
       return Files.readAllLines(outputFilePath);
+    }
+
+    public IncrementalManager getIncrementalManager() {
+      return incrementalManager;
     }
 
     public TranspileResult assertNoWarnings() {
@@ -359,9 +383,9 @@ public class TranspilerTester {
     }
   }
 
-  private static TranspileResult invokeTranspiler(Iterable<String> args, Path outputPath, TranspileContext ctx) {
+  private static TranspileResult invokeTranspiler(Iterable<String> args, Path outputPath) {
     try {
-      return new TranspileResult(transpile(args, ctx), outputPath);
+      return new TranspileResult(transpile(args), outputPath);
     } catch (Exception e) {
       e.printStackTrace();
       Problems problems = new Problems();
@@ -370,60 +394,36 @@ public class TranspilerTester {
     }
   }
 
-  private static Problems transpile(Iterable<String> args, TranspileContext ctx) throws Exception {
+  private static Problems transpile(Iterable<String> args) throws Exception {
     // J2clCommandLineRunner.run is hidden since we don't want it to be used as an entry point. As a
     // result we use reflection here to invoke it.
     Method transpileMethod =
-        J2clCommandLineRunner.class.getDeclaredMethod("runForTest", String[].class, Object.class);
+        J2clCommandLineRunner.class.getDeclaredMethod("runForTest", String[].class);
     transpileMethod.setAccessible(true);
-    Problems problems = (Problems) transpileMethod.invoke(null, (Object) Iterables.toArray(args, String.class), ctx);
+    Problems problems = (Problems) transpileMethod.invoke(null, (Object) Iterables.toArray(args, String.class));
     return problems;
   }
 
-  private Problems compile(TranspileContext ctx) {
-    Problems problems = null;
-
-    try {
-      Path tempDir = null;
-
-      tempDir = Files.createTempDirectory(temporaryDirectoryPrefix);
-
-      if (tempDir != null && !files.isEmpty()) {
-        // 1. Create an input directory
-        Path inputPath = tempDir.resolve("input");
-        Files.createDirectories(inputPath);
-
-        checkState(!packageName.contains(".") && !packageName.contains("/"));
-        Path packagePath = inputPath.resolve(packageName);
-        Files.createDirectories(packagePath);
-
-        // 2. Create all declared files on disk
-        files.forEach(file -> file.createFileIn(inputPath));
-
-        List<String> fileNames = files.stream()
-             .filter(Predicates.or(File::isJavaSourceFile, File::isSrcJar))
-             .map(file -> inputPath.resolve(file.getFilePath()))
-             .map(Path::toAbsolutePath)
-             .map(Path::toString)
-             .collect(toImmutableList());
-        problems = new JavacHelper().compile(fileNames, classPath, classesOutPath.toFile());
-
+  private TranspileResult transpile() {
+    if (indirect) {
+      return transpileIndirect();
+    } else {
+      try {
+        return transpileDirect();
+      } catch (Exception e) {
+        e.printStackTrace();
+        Problems problems = new Problems();
+        problems.error("%s", e.toString());
+        return new TranspileResult(problems, outputPath);
       }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
-
-    return problems;
   }
 
-  private TranspileResult transpile(TranspileContext ctx) {
+  private TranspileResult transpileIndirect() {
     try {
-      Path tempDir = Files.createTempDirectory(temporaryDirectoryPrefix);
+      Path tempDir = (this.tempPath != null) ? this.tempPath : Files.createTempDirectory(temporaryDirectoryPrefix);
 
-      if (outputPath == null) {
-        outputPath = tempDir.resolve("output");
-        Files.createDirectories(outputPath);
-      }
+      createOutPath(tempDir);
 
       ImmutableList.Builder<String> commandLineArgsBuilder =
           ImmutableList.<String>builder()
@@ -433,23 +433,16 @@ public class TranspilerTester {
       if (!files.isEmpty()) {
         // 1. Create an input directory
         Path inputPath = tempDir.resolve("input");
-        Files.createDirectories(inputPath);
 
-        checkState(!packageName.contains(".") && !packageName.contains("/"));
+        generateFiles(inputPath);
+
         Path packagePath = inputPath.resolve(packageName);
-        Files.createDirectories(packagePath);
-
-        // 2. Create all declared files on disk
-        files.forEach(file -> file.createFileIn(inputPath));
+        ImmutableList<String> paths = getAllFiles(packagePath).stream()
+                                                              .map(file -> file.getFilePath().toAbsolutePath().toString())
+                                                              .collect(toImmutableList());
 
         // 3. Add Java source files and srcjar files to command line.
-        commandLineArgsBuilder.addAll(
-            files.stream()
-                .filter(Predicates.or(File::isJavaSourceFile, File::isSrcJar))
-                .map(file -> inputPath.resolve(file.getFilePath()))
-                .map(Path::toAbsolutePath)
-                .map(Path::toString)
-                .collect(toImmutableList()));
+        commandLineArgsBuilder.addAll(paths);
 
         // 4. Create a source zip containing the native.js sources.
         List<File> nativeSources =
@@ -463,10 +456,187 @@ public class TranspilerTester {
       // Passthru explicitly defined args
       commandLineArgsBuilder.addAll(args);
 
-      return invokeTranspiler(commandLineArgsBuilder.build(), outputPath, ctx);
+      return invokeTranspiler(commandLineArgsBuilder.build(), outputPath);
     } catch (IOException e) {
       throw new AssertionError(e);
     }
+  }
+
+  private void createOutPath(Path tempDir) throws IOException {
+    if (outputPath == null) {
+      outputPath = tempDir.resolve("output");
+      Files.createDirectories(outputPath);
+    }
+  }
+
+  private List<String> generateFiles(Path inputPath) throws IOException {
+    Files.createDirectories(inputPath);
+
+    checkState(!packageName.contains(".") && !packageName.contains("/"));
+    Path packagePath = inputPath.resolve(packageName);
+    Files.createDirectories(packagePath);
+
+    // 2. Create all new declared files on disk
+    files.forEach(file -> file.createFileIn(inputPath));
+
+    return getAllFiles(packagePath).stream()
+                                   .filter(Predicates.or(File::isJavaSourceFile, File::isSrcJar))
+                                   .map(file -> inputPath.resolve(file.getFilePath()))
+                                   .map(Path::toAbsolutePath)
+                                   .map(Path::toString)
+                                   .collect(toImmutableList());
+  }
+
+//  private J2clTranspilerOptions createOptions(List<String> files, String output) {
+//    Problems problems = new Problems();
+//
+//    return J2clTranspilerOptions.newBuilder()
+//                                .setSources(
+//                                        FrontendUtils.getAllSources(files, problems)
+//                                                     .filter(p -> p.sourcePath().endsWith(".java"))
+//                                                     .collect(ImmutableList.toImmutableList()))
+//                                .setNativeSources(
+//                                        FrontendUtils.getAllSources(getPathEntries(""), problems)
+//                                                     .filter(p -> p.sourcePath().endsWith(".native.js"))
+//                                                     .collect(ImmutableList.toImmutableList()))
+//                                .setClasspaths(getPathEntries(this.classPath))
+//                                .setOutput(
+//                                        output.endsWith(".zip")
+//                                        ? getZipOutput(output, problems)
+//                                        : getDirOutput(output, problems))
+//                                .setEmitReadableSourceMap(false)
+//                                .setEmitReadableLibraryInfo(false)
+//                                .setGenerateKytheIndexingMetadata(false)
+//                                .setFrontend(Frontend.JAVAC)
+//                                .build();
+//  }
+
+  private TranspileResult transpileDirect() throws Exception  {
+    Path tempDir = (this.tempPath != null) ? this.tempPath : Files.createTempDirectory(temporaryDirectoryPrefix);
+
+    createOutPath(tempDir);
+
+    J2clTranspilerOptions.Builder builder = J2clTranspilerOptions.newBuilder();
+
+    if (!files.isEmpty()) {
+      Problems problems = new Problems();
+      // 1. Create an input directory
+      Path inputPath = tempDir.resolve("input");
+
+      generateFiles(inputPath);
+
+      Path packagePath = inputPath.resolve(packageName);
+      ImmutableList<String> paths = getAllFiles(packagePath).stream()
+                                                            .map(file -> file.getFilePath().toAbsolutePath().toString())
+                                                            .collect(toImmutableList());
+
+      builder.setSources(FrontendUtils.getAllSources(paths, problems)
+                                      .filter(p -> p.sourcePath().endsWith(".java"))
+                                      .collect(ImmutableList.toImmutableList()));
+
+      // 4. Create a source zip containing the native.js sources.
+//      List<File> nativeSources =
+//              files.stream().filter(File::isNativeJsFile).collect(toImmutableList());
+//      if (!nativeSources.isEmpty()) {
+//        Path nativeZipPath = createNativeZipFile(inputPath, nativeSources, "nativefiles.zip");
+//        builder.setNativeSources(
+//                FrontendUtils.getAllSources(getPathEntries(nativeZipPath.toAbsolutePath().toString()), problems)
+//                             .filter(p -> p.sourcePath().endsWith(".native.js"))
+//                             .collect(ImmutableList.toImmutableList()));
+//      }
+      builder.setNativeSources(
+              FrontendUtils.getAllSources(getPathEntries(""), problems)
+                           .filter(p -> p.sourcePath().endsWith(".native.js"))
+                           .collect(ImmutableList.toImmutableList()));
+
+      builder.setClasspaths(getPathEntries(this.classPath));
+      builder.setOutput(this.outputPath);
+      builder.setEmitReadableSourceMap(false);
+      builder.setEmitReadableLibraryInfo(false);
+      builder.setGenerateKytheIndexingMetadata(false);
+      builder.setFrontend(Frontend.JAVAC);
+      builder.setIncremental(this.incremental);
+    }
+
+    J2clTranspilerOptions options = builder.build();
+    try {
+      TranspileResult results = transpileDirect(options, outputPath);
+      return results;
+    } catch (Exception e) {
+      e.printStackTrace();
+      Problems problems = new Problems();
+      problems.error("%s", e.toString());
+      return new TranspileResult(problems, outputPath);
+    }
+  }
+
+  private static TranspileResult transpileDirect(J2clTranspilerOptions options, Path outputPath) throws Exception {
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    Future<TranspileResult> result = executorService.submit(() -> invokeDirect(options, outputPath));
+    executorService.shutdown();
+
+    try {
+      return Uninterruptibles.getUninterruptibly(result);
+    } catch (ExecutionException e) {
+      // Try unwrapping the cause...
+      Throwables.throwIfUnchecked(e.getCause());
+      throw new AssertionError(e.getCause());
+    }
+  }
+
+  private static TranspileResult invokeDirect(J2clTranspilerOptions options, Path outputPath) throws NoSuchMethodException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException {
+    Constructor<J2clTranspiler> constructor =  J2clTranspiler.class.getDeclaredConstructor(J2clTranspilerOptions.class);
+    constructor.setAccessible(true);
+    J2clTranspiler j2cl = constructor.newInstance(options);
+
+    Method transpileMethod =
+            J2clTranspiler.class.getDeclaredMethod("transpileImpl");
+    transpileMethod.setAccessible(true);
+
+    Problems problems = (Problems) transpileMethod.invoke(j2cl);
+
+    Method getIncrementalManagerMethod =
+            J2clTranspiler.class.getDeclaredMethod("getIncrementalManager");
+    getIncrementalManagerMethod.setAccessible(true);
+    IncrementalManager incrementalManager = (IncrementalManager) getIncrementalManagerMethod.invoke(j2cl);
+
+    return new TranspileResult(problems, outputPath, incrementalManager);
+  }
+
+  public TranspilerTester compile() {
+    try {
+      Path tempDir = (this.tempPath != null) ? this.tempPath : Files.createTempDirectory(temporaryDirectoryPrefix);
+
+      if (tempDir != null) {
+        // 1. Create an input directory
+        Path inputPath = tempDir.resolve("input");
+        Files.createDirectories(inputPath);
+
+        checkState(!packageName.contains(".") && !packageName.contains("/"));
+        Path packagePath = inputPath.resolve(packageName);
+        Files.createDirectories(packagePath);
+
+        // 2. Create all new declared files on disk
+        files.forEach(file -> file.createFileIn(inputPath));
+
+        List<String> fileNames = getAllFiles(packagePath).stream()
+                                      .filter(Predicates.or(File::isJavaSourceFile, File::isSrcJar))
+                                      .map(file -> inputPath.resolve(file.getFilePath()))
+                                      .map(Path::toAbsolutePath)
+                                      .map(Path::toString)
+                                      .collect(toImmutableList());
+        new JavacHelper().compile(fileNames, classPath, classesOutPath.toFile());
+
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return this;
+  }
+
+  private ImmutableList<File> getAllFiles(Path packagePath) throws IOException {
+    return Files.list(packagePath).map(path -> new File(path, null)).collect(toImmutableList());
   }
 
   private Path createNativeZipFile(Path inputPath, List<File> nativeSources, String outputFileName)

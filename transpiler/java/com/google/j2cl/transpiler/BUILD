@@ -7,6 +7,7 @@ java_library(
     srcs = [
         "J2clTranspiler.java",
         "J2clTranspilerOptions.java",
+        "TranspilerObserver.java",
     ],
     deps = [
         "//third_party:auto_value",

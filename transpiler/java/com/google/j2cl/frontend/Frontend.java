@@ -34,7 +34,6 @@ public enum Frontend {
             List<String> classPath,
             List<FileInfo> sources,
             boolean useTargetClassPath,
-            TranspileContext ctx,
             Problems problems) {
       CompilationUnitsAndTypeBindings jdtUnitsAndResolvedBindings =
           createJdtUnitsAndResolveBindings(classPath, sources, useTargetClassPath, problems);
@@ -67,7 +66,7 @@ public enum Frontend {
             List<String> classPath,
             List<FileInfo> sources,
             boolean useTargetClassPath,
-            TranspileContext ctx, Problems problems) {
+            Problems problems) {
       init(classPath, problems);
       return new JavacParser(classPath, problems).parseFiles(sources, useTargetClassPath);
     }
@@ -77,7 +76,6 @@ public enum Frontend {
           List<String> classPath,
           List<FileInfo> sources,
           boolean useTargetClassPath,
-          TranspileContext ctx,
           Problems problems);
 
   private static void init(List<String> classPath, Problems problems) {

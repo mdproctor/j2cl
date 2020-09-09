@@ -29,10 +29,10 @@ public abstract class CommandLineTool {
     this.toolName = toolName;
   }
 
-  protected abstract Problems run(Object ctx);
+  protected abstract Problems run();
 
   // TODO(goktug): reduce visibility.
-  protected Problems processRequest(String[] args, Object ctx) {
+  protected Problems processRequest(String[] args) {
     Problems problems = new Problems();
     CmdLineParser parser = new CmdLineParser(this);
 
@@ -55,14 +55,14 @@ public abstract class CommandLineTool {
     }
 
     try {
-      return run(ctx);
+      return run();
     } catch (Problems.Exit e) {
       return e.getProblems();
     }
   }
 
   protected final void execute(String[] args, Object ctx) {
-    Problems problems = this.processRequest(args, ctx);
+    Problems problems = this.processRequest(args);
     System.exit(problems.reportAndGetExitCode(System.err));
   }
 }

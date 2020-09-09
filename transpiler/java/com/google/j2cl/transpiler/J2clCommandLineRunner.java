@@ -31,7 +31,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.j2cl.frontend.TranspileContext;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 
@@ -86,9 +85,9 @@ public final class J2clCommandLineRunner extends CommandLineTool {
   }
 
   @Override
-  protected Problems run(Object ctx) {
+  protected Problems run() {
     J2clTranspilerOptions options = createOptions();
-    return J2clTranspiler.transpile(options, (TranspileContext) ctx);
+    return J2clTranspiler.transpile(options);
   }
 
   private J2clTranspilerOptions createOptions() {
@@ -119,10 +118,11 @@ public final class J2clCommandLineRunner extends CommandLineTool {
         .setEmitReadableLibraryInfo(false)
         .setGenerateKytheIndexingMetadata(this.generateKytheIndexingMetadata)
         .setFrontend(this.frontEnd)
+        .setIncremental(false)
         .build();
   }
 
-  private static Path getDirOutput(String output, Problems problems) {
+  public static Path getDirOutput(String output, Problems problems) {
     Path outputPath = Paths.get(output);
     if (Files.isRegularFile(outputPath)) {
       problems.fatal(FatalError.OUTPUT_LOCATION, outputPath);
@@ -130,15 +130,15 @@ public final class J2clCommandLineRunner extends CommandLineTool {
     return outputPath;
   }
 
-  private static Path getZipOutput(String output, Problems problems) {
+  public static Path getZipOutput(String output, Problems problems) {
     FileSystem newFileSystem = FrontendUtils.initZipOutput(output, problems);
     return newFileSystem == null ? null : newFileSystem.getPath("/");
   }
 
-  private static List<String> getPathEntries(String path) {
+  public static List<String> getPathEntries(String path) {
     List<String> entries = new ArrayList<>();
     for (String entry : Splitter.on(File.pathSeparatorChar).omitEmptyStrings().split(path)) {
-      if (new File(entry).exists()) {
+      if (Files.exists(Paths.get(entry))) {
         entries.add(entry);
       }
     }
@@ -146,8 +146,8 @@ public final class J2clCommandLineRunner extends CommandLineTool {
   }
 
   // Exists for testing, should be removed when tests stop using flags.
-  static Problems runForTest(String[] args, Object ctx) {
-    return new J2clCommandLineRunner().processRequest(args, ctx);
+  static Problems runForTest(String[] args) {
+    return new J2clCommandLineRunner().processRequest(args);
   }
 
   public static void main(String[] args) {

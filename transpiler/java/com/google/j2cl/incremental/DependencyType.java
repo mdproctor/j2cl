@@ -1,4 +1,4 @@
-package com.google.j2cl.sdm;
+package com.google.j2cl.incremental;
 
 public enum DependencyType {
     // METHOD and FIELD may have wrapper text at the useby point.

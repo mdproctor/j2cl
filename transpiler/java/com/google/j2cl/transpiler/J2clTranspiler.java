@@ -15,7 +15,6 @@ package com.google.j2cl.transpiler;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.j2cl.ast.CompilationUnit;
 import com.google.j2cl.ast.visitors.ArrayAccessNormalizer;
@@ -92,48 +91,27 @@ import com.google.j2cl.ast.visitors.VerifyVariableScoping;
 import com.google.j2cl.common.FrontendUtils;
 import com.google.j2cl.common.Problems;
 import com.google.j2cl.common.Problems.FatalError;
-import com.google.j2cl.frontend.TranspileContext;
-import com.google.j2cl.frontend.javac.JavacParser;
 import com.google.j2cl.generator.OutputGeneratorStage;
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.tools.javac.api.JavacTaskImpl;
-import com.sun.tools.javac.file.JavacFileManager;
+import com.google.j2cl.incremental.IncrementalManager;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
-
-import static java.util.stream.Collectors.toList;
 
 /** Translation tool for generating JavaScript source files from Java sources. */
 public class J2clTranspiler {
 
   /** Runs the entire J2CL pipeline. */
   static Problems transpile(J2clTranspilerOptions options) {
-    return transpile(options, null);
-  }
-
-  static Problems transpile(J2clTranspilerOptions options, TranspileContext ctx) {
     // Compiler has no static state, but rather uses thread local variables.
     // Because of this, we invoke the compiler on a different thread each time.
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     Future<Problems> result =
-        executorService.submit(() -> new J2clTranspiler(options, ctx).transpileImpl());
+        executorService.submit(() -> new J2clTranspiler(options).transpileImpl());
     // Shutdown the executor service since it will only run a single transpilation. If not shutdown
     // it prevents the JVM from ending the process (see Executors.newFixedThreadPool()). This is not
     // normally observed since the transpiler in normal circumstances ends with System.exit() which
@@ -152,36 +130,41 @@ public class J2clTranspiler {
 
   private final Problems problems = new Problems();
   private final J2clTranspilerOptions options;
-  private final TranspileContext ctx;
 
-  private J2clTranspiler(J2clTranspilerOptions options, TranspileContext ctx) {
+  // This is just here for test, to test it's internal state
+  private IncrementalManager incrementalManager;
+
+  private J2clTranspiler(J2clTranspilerOptions options) {
     this.options = options;
-    this.ctx = ctx;
   }
 
   private Problems transpileImpl() {
+    ImmutableList<FrontendUtils.FileInfo> sources = options.getSources();
+    if (options.isIncremental()) {
+      this.incrementalManager = new IncrementalManager(options);
+      sources = this.incrementalManager.getSources();
+    }
+
     try {
       List<CompilationUnit> j2clUnits =
-          options
-              .getFrontend()
-              .getCompilationUnits(
-                  options.getClasspaths(),
-                  options.getSources(),
-                  options.getGenerateKytheIndexingMetadata(),
-                  ctx,
-                  problems);
+              options
+                      .getFrontend()
+                      .getCompilationUnits(
+                              options.getClasspaths(),
+                              sources,
+                              options.getGenerateKytheIndexingMetadata(),
+                              problems);
       if (!j2clUnits.isEmpty()) {
         checkUnits(j2clUnits);
         normalizeUnits(j2clUnits);
       }
 
-      if (ctx != null) {
-        if (ctx.getVisitor() != null) {
-          for (CompilationUnit unit : j2clUnits) {
-            unit.accept(ctx.getVisitor());
-          }
+      if (incrementalManager != null) {
+        try {
+          incrementalManager.processJ2CLUnits(j2clUnits);
+        } catch (IOException e) {
+          throw new IllegalStateException("Using incremental mode, unable to process j2clUnits and write to file.", e);
         }
-        ctx.j2clUnitsAsMap(j2clUnits);
       }
 
       generateOutputs(j2clUnits);
@@ -343,5 +326,9 @@ public class J2clTranspiler {
         problems.fatal(FatalError.CANNOT_CLOSE_ZIP, e.getMessage());
       }
     }
+  }
+
+  IncrementalManager getIncrementalManager() {
+    return incrementalManager;
   }
 }

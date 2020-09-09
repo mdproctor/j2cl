@@ -2,10 +2,7 @@ package com.google.j2cl.transpiler.integration;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,10 +20,8 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.j2cl.common.FrontendUtils;
 import com.google.j2cl.common.Problems;
-import com.google.j2cl.frontend.TranspileContext;
 import com.sun.tools.javac.api.JavacTaskImpl;
 import com.sun.tools.javac.file.JavacFileManager;
-import com.sun.tools.javac.main.Main;
 
 import static java.util.stream.Collectors.toList;
 

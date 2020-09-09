@@ -1,9 +1,7 @@
-package com.google.j2cl.sdm;
+package com.google.j2cl.incremental;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.j2cl.ast.DeclaredTypeDescriptor;
 
@@ -19,6 +17,11 @@ public class TypeInfo {
     public TypeInfo(DeclaredTypeDescriptor type) {
         setType(type);
         this.uniqueId = type.getUniqueId();
+    }
+
+    public TypeInfo(String uniqueId) {
+        setType(null);
+        this.uniqueId = uniqueId;
     }
 
     public String getUniqueId() {
@@ -61,7 +64,8 @@ public class TypeInfo {
         return incomingDependencies.add(dependency);
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -72,7 +76,8 @@ public class TypeInfo {
         return uniqueId.equals(that.uniqueId);
     }
 
-    @Override public int hashCode() {
+    @Override
+    public int hashCode() {
         return uniqueId.hashCode();
     }
 
