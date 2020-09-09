@@ -159,7 +159,10 @@ public class J2clTranspiler {
         normalizeUnits(j2clUnits);
       }
 
-      if (incrementalManager != null) {
+      if (incrementalManager != null && !problems.hasErrors()) {
+        // Do not process the units, if there are problems
+        // This means it will not write out a new incremental.dat either,
+        // effectively meaning next iteration it will continue from the last known good point
         try {
           incrementalManager.processJ2CLUnits(j2clUnits);
         } catch (IOException e) {

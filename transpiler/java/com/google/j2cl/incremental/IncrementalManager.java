@@ -9,9 +9,11 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
@@ -27,6 +29,7 @@ import com.google.j2cl.ast.Type;
 import com.google.j2cl.ast.TypeDeclaration;
 import com.google.j2cl.ast.TypeDescriptor;
 import com.google.j2cl.common.FrontendUtils;
+import com.google.j2cl.common.Problems;
 import com.google.j2cl.transpiler.J2clTranspilerOptions;
 
 public class IncrementalManager {
@@ -134,7 +137,7 @@ public class IncrementalManager {
         }
 
         // Expand the list of types that need to be transpiled
-        List<TypeInfo> impacted = buildImpacted();
+        Set<TypeInfo> impacted = buildImpacted();
 
         // add those impacted types to the sources list, and also prepare their TypoInfo's for update
         for (TypeInfo typeInfo : impacted) {
@@ -143,8 +146,8 @@ public class IncrementalManager {
         }
     }
 
-    private List<TypeInfo> buildImpacted() {
-        List<TypeInfo> impacted = new ArrayList<>();
+    private Set<TypeInfo> buildImpacted() {
+        Set<TypeInfo> impacted = new HashSet<>();
         for (String type : changeSet.getUpdated()) {
             buildImpacted(type, impacted);
         }
@@ -152,7 +155,7 @@ public class IncrementalManager {
         return impacted;
     }
 
-    private void buildImpacted(String type, List<TypeInfo> impacted) {
+    private void buildImpacted(String type, Set<TypeInfo> impacted) {
         TypeInfo typeInfo = typeInfoLookup.get(type);
         for (Dependency dep : typeInfo.getIncomingDependencies()) {
             if (dep.isCalleeHasImpact()) {

@@ -152,6 +152,17 @@ public class TranspilerTester {
         getPackageRelativePath(compilationUnitName + ".java"), Joiner.on('\n').join(content));
   }
 
+  public TranspilerTester removeCompilationUnit(String compilationUnitName) {
+    Path path = getPackageRelativePath(compilationUnitName + ".java");
+    Path inputPath = tempPath.resolve("input");
+    try {
+      Files.delete(inputPath.resolve(path));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return this;
+  }
+
   public TranspilerTester addNativeFile(String compilationUnitName, String... code) {
     return addPath(
         getPackageRelativePath(compilationUnitName + ".native.js"), Joiner.on('\n').join(code));
@@ -518,7 +529,7 @@ public class TranspilerTester {
 
     J2clTranspilerOptions.Builder builder = J2clTranspilerOptions.newBuilder();
 
-    if (!files.isEmpty()) {
+    //if (!files.isEmpty()) {
       Problems problems = new Problems();
       // 1. Create an input directory
       Path inputPath = tempDir.resolve("input");
@@ -556,7 +567,7 @@ public class TranspilerTester {
       builder.setGenerateKytheIndexingMetadata(false);
       builder.setFrontend(Frontend.JAVAC);
       builder.setIncremental(this.incremental);
-    }
+    //}
 
     J2clTranspilerOptions options = builder.build();
     try {
@@ -564,7 +575,7 @@ public class TranspilerTester {
       return results;
     } catch (Exception e) {
       e.printStackTrace();
-      Problems problems = new Problems();
+      problems = new Problems();
       problems.error("%s", e.toString());
       return new TranspileResult(problems, outputPath);
     }
