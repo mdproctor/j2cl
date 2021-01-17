@@ -3,8 +3,10 @@ package com.google.j2cl.transpiler.incremental;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +103,7 @@ public class TypeGraphManager {
         return store;
     }
 
-    List<TypeInfo> typeStack = new ArrayList<>();
+    Deque<TypeInfo> typeStack = new ArrayDeque<>();
 
     public AbstractVisitor visitor;
 
@@ -129,7 +131,7 @@ public class TypeGraphManager {
             }
 
             TypeInfo typeInfo = store.get(type);
-            typeStack.add(typeInfo);
+            typeStack.push(typeInfo);
             if (typeInfo.getType()==null) {
                 // If the TypeInfo existed previously and was updated, it's type field is nulled, so reconnect to current TypeDescriptor
                 typeInfo.setType(type);
@@ -153,10 +155,12 @@ public class TypeGraphManager {
 
             List<DeclaredTypeDescriptor> extendsAndInterfaces = new ArrayList<>();
             DeclaredTypeDescriptor superDeclr = type.getSuperTypeDescriptor();
-            while (!superDeclr.getUniqueId().equals("?java.lang.Object")) {
+
+            while (superDeclr != null && !superDeclr.getUniqueId().substring(1).equals("java.lang.Object")) {
                 extendsAndInterfaces.add(superDeclr);
                 superDeclr = superDeclr.getSuperTypeDescriptor();
             }
+
             extendsAndInterfaces.addAll(type.getInterfaceTypeDescriptors());
 
             for(DeclaredTypeDescriptor descr : extendsAndInterfaces) {
@@ -172,7 +176,9 @@ public class TypeGraphManager {
                 // ignore built in types
                 return;
             }
-            typeStack.remove(typeStack.size()-1);
+
+            if(!typeStack.isEmpty())
+                typeStack.pop();
         }
 
 
@@ -239,7 +245,13 @@ public class TypeGraphManager {
                 // ignore built in types
                 return true;
             }
-            TypeInfo callerInfo = typeStack.get(typeStack.size()-1);
+
+            if(typeStack.isEmpty()) {
+                return true;
+            }
+
+
+            TypeInfo callerInfo = typeStack.pop();
 
             TypeInfo calleeInfo = store.get(calleeType);
 
@@ -276,7 +288,10 @@ public class TypeGraphManager {
                 // ignore built in types
                 return true;
             }
-            TypeInfo callerInfo = typeStack.get(typeStack.size()-1);
+            if(typeStack.isEmpty()) {
+                return true;
+            }
+            TypeInfo callerInfo = typeStack.pop();
 
             TypeInfo calleeInfo = store.get(calleeType);
 
@@ -306,10 +321,11 @@ public class TypeGraphManager {
                 return true;
             }
 
-            TypeInfo callerInfo = typeStack.get(typeStack.size()-1);
+            if(!typeStack.isEmpty()) {
+                TypeInfo callerInfo = typeStack.pop();
 
-            visitClassReference(callerInfo, calleeType );
-
+                visitClassReference(callerInfo, calleeType);
+            }
             return super.enterVariable(node);
         }
 
@@ -319,12 +335,18 @@ public class TypeGraphManager {
             // JsType's have their "new" used directly, non JsType have "create$" used directly, and the "new" is internal.
             MethodDescriptor methodDescr = node.getTarget();
 
-            TypeInfo callerInfo = typeStack.get(typeStack.size()-1);
             DeclaredTypeDescriptor   callee = methodDescr.getEnclosingTypeDescriptor();
             if(ignoreType(callee.getUniqueId())) {
                 // ignore built in types
                 return true;
             }
+
+            if(typeStack.isEmpty()) {
+                return true;
+            }
+
+            TypeInfo callerInfo = typeStack.pop();
+
             TypeInfo calleeInfo = store.get(callee);
 
             if (skipSameFileReference(callerInfo, calleeInfo)) {
