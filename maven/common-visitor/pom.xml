@@ -9,7 +9,7 @@
         <artifactId>j2cl-parent</artifactId>
         <version>0.9-SNAPSHOT</version>
     </parent>
-    <artifactId>passes</artifactId>
+    <artifactId>common-visitor</artifactId>
     <packaging>pom</packaging>
 
     <build>
@@ -28,11 +28,11 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/passes/libpasses.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/common/visitor/libvisitor-internal.jar</file>
                                     <type>jar</type>
                                 </artifact>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/passes/libpasses-src.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/common/visitor/libvisitor-internal-src.jar</file>
                                     <type>jar</type>
                                     <classifier>sources</classifier>
                                 </artifact>
@@ -44,20 +44,6 @@
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>com.vertispan.j2cl</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vertispan.j2cl</groupId>
-            <artifactId>ast</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 </project>

@@ -66,10 +66,10 @@ def j2cl_library(
         _to_j2wasm_targets("exports", j2wasm_args)
         j2wasm_args["tags"] = (j2wasm_args.get("tags") or []) + ["manual", "notap"]
 
-        j2wasm_library(
-            name = j2wasm_library_name,
-            **j2wasm_args
-        )
+#        j2wasm_library(
+#            name = j2wasm_library_name,
+#            **j2wasm_args
+#        )
 
 _ALLOWED_ATTRS = [key for key in J2WASM_LIB_ATTRS] + ["tags", "visibility"]
 

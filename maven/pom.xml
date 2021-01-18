@@ -19,7 +19,9 @@
 
   <modules>
     <module>external</module>
+
     <module>common</module>
+    <module>common-visitor</module>
     <module>ast</module>
 
     <module>backend</module>
@@ -33,6 +35,8 @@
     <module>frontend-common</module>
     <module>frontend-jdt</module>
     <module>frontend-javac</module>
+
+    <module>passes</module>
 
     <module>transpiler</module>
 

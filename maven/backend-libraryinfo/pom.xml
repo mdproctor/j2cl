@@ -60,7 +60,7 @@
 
         <dependency>
             <groupId>com.vertispan.j2cl</groupId>
-            <artifactId>libraryinfo-proto</artifactId>
+            <artifactId>backend-libraryinfo-proto</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
