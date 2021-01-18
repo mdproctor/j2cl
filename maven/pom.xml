@@ -6,7 +6,7 @@
 
   <groupId>com.vertispan.j2cl</groupId>
   <artifactId>j2cl-parent</artifactId>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -21,20 +21,19 @@
     <module>external</module>
     <module>common</module>
     <module>ast</module>
-    <module>ast-annotations</module>
-    <module>ast-annotations-internal</module>
-    <!--<module>ast-processors</module>-->
-    <module>ast-processors-common</module>
-    <module>ast-visitors</module>
+
+    <module>backend</module>
+    <module>backend-common</module>
+    <module>backend-libraryinfo</module>
+    <module>backend-libraryinfo-proto</module>
+    <module>backend-closure</module>
+    <module>backend-wasm</module>
 
     <module>frontend</module>
     <module>frontend-common</module>
     <module>frontend-jdt</module>
     <module>frontend-javac</module>
 
-    <module>libraryinfo-proto</module>
-    <module>libraryinfo</module>
-    <module>generator</module>
     <module>transpiler</module>
 
     <module>gwt-incompatible-stripper</module>

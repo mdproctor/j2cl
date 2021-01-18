@@ -8,9 +8,8 @@
         <groupId>com.vertispan.j2cl</groupId>
         <artifactId>j2cl-parent</artifactId>
         <version>0.9-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
-    <artifactId>junit-async</artifactId>
+    <artifactId>backend-common</artifactId>
     <packaging>pom</packaging>
 
     <build>
@@ -29,11 +28,11 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>../../../bazel-bin/junit/generator/java/com/google/j2cl/junit/async/libasync.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/backend/common/libcommon.jar</file>
                                     <type>jar</type>
                                 </artifact>
                                 <artifact>
-                                    <file>../../../bazel-bin/junit/generator/java/com/google/j2cl/junit/async/libasync-src.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/backend/common/libcommon-src.jar</file>
                                     <type>jar</type>
                                     <classifier>sources</classifier>
                                 </artifact>
@@ -44,4 +43,21 @@
             </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vertispan.j2cl</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vertispan.j2cl</groupId>
+            <artifactId>ast</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

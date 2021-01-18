@@ -7,12 +7,11 @@
     <parent>
         <groupId>com.vertispan.j2cl</groupId>
         <artifactId>j2cl-parent</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.9-SNAPSHOT</version>
     </parent>
-    <artifactId>ast-processors</artifactId>
+    <artifactId>backend-wasm</artifactId>
     <packaging>pom</packaging>
 
-    <!-- TODO this isn't used yet, since j2cl only needs it at its own compile-time -->
     <build>
         <plugins>
             <plugin>
@@ -29,11 +28,11 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/ast/processors/libprocessor-components.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/backend/wasm/libwasm.jar</file>
                                     <type>jar</type>
                                 </artifact>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/ast/processors/libprocessor-components-src.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/backend/wasm/libwasm-src.jar</file>
                                     <type>jar</type>
                                     <classifier>sources</classifier>
                                 </artifact>
@@ -46,8 +45,40 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.javascript</groupId>
+            <artifactId>closure-compiler-unshaded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.vertispan.j2cl</groupId>
-            <artifactId>ast-annotations-internal</artifactId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vertispan.j2cl</groupId>
+            <artifactId>ast</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vertispan.j2cl</groupId>
+            <artifactId>backend-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vertispan.j2cl</groupId>
+            <artifactId>backend-libraryinfo</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

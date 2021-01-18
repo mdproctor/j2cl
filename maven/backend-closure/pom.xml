@@ -9,7 +9,7 @@
         <artifactId>j2cl-parent</artifactId>
         <version>0.9-SNAPSHOT</version>
     </parent>
-    <artifactId>frontend-javac</artifactId>
+    <artifactId>backend-closure</artifactId>
     <packaging>pom</packaging>
 
     <build>
@@ -28,11 +28,11 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/frontend/javac/libjavac.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/backend/closure/libclosure.jar</file>
                                     <type>jar</type>
                                 </artifact>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/frontend/javac/libjavac-src.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/backend/closure/libclosure-src.jar</file>
                                     <type>jar</type>
                                     <classifier>sources</classifier>
                                 </artifact>
@@ -45,19 +45,27 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.jsinterop</groupId>
-            <artifactId>jsinterop-annotations</artifactId>
+            <groupId>com.google.javascript</groupId>
+            <artifactId>closure-compiler-unshaded</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>javac</artifactId>
-            <version>1.9.0-dev-r2644-1</version>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.vertispan.j2cl</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.vertispan.j2cl</groupId>
             <artifactId>ast</artifactId>
@@ -65,7 +73,12 @@
         </dependency>
         <dependency>
             <groupId>com.vertispan.j2cl</groupId>
-            <artifactId>frontend-common</artifactId>
+            <artifactId>backend-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vertispan.j2cl</groupId>
+            <artifactId>backend-libraryinfo</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

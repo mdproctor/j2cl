@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.vertispan.j2cl</groupId>
     <artifactId>j2cl-parent</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
   </parent>
   <artifactId>minifier</artifactId>
   <packaging>pom</packaging>
@@ -52,5 +52,6 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
+    <!-- rta code removal info proto dep -->
   </dependencies>
 </project>

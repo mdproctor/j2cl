@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vertispan.j2cl</groupId>
         <artifactId>j2cl-parent</artifactId>
-        <version>0.8-SNAPSHOT</version>
+        <version>0.9-SNAPSHOT</version>
     </parent>
     <artifactId>frontend-jdt</artifactId>
     <packaging>pom</packaging>
@@ -28,11 +28,11 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/frontend/jdt/libjdt.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/frontend/jdt/libjdt.jar</file>
                                     <type>jar</type>
                                 </artifact>
                                 <artifact>
-                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/frontend/jdt/libjdt-src.jar</file>
+                                    <file>../../bazel-bin/transpiler/java/com/google/j2cl/transpiler/frontend/jdt/libjdt-src.jar</file>
                                     <type>jar</type>
                                     <classifier>sources</classifier>
                                 </artifact>
